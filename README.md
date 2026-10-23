@@ -13,6 +13,8 @@ Built with [Astro](https://astro.build), hosted on GitHub Pages, edited with [Sv
    - **Your account was added as a collaborator** (anyone else): first accept the collaborator invitation, then create a **classic** token with the `repo` scope at [github.com/settings/tokens/new?scopes=repo](https://github.com/settings/tokens/new?scopes=repo&description=blix%20website%20editor). GitHub doesn't let fine-grained tokens work on someone else's personal repository.
 3. Edit, then press **Save**. The website updates automatically **2–3 minutes** later.
 
+**Stuck on "Loading site data"?** Usually an ad blocker or old saved editor data in the browser. Check it works in a private/incognito window; if so, allow the site in your ad blocker (e.g. AdBlock → *Pause on this site*) and clear the site's data (icon left of the address bar → *Site settings* → *Delete data*), then sign in again.
+
 | What you want to change | Where in the editor |
 | --- | --- |
 | Opening hours, address, Instagram/newsletter/store/booking links, contact form key | **Site settings** |
