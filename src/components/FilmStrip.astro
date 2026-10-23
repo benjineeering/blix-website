@@ -2,12 +2,15 @@
 // A horizontally scrolling strip of scans with sprocket holes and edge markings.
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
+import { langFromUrl } from '../i18n/config';
+import { useTranslations } from '../i18n/ui';
 
 interface Props {
   items: { image: ImageMetadata; caption?: string }[];
   label?: string;
 }
-const { items, label = 'Sample scans' } = Astro.props;
+const t = useTranslations(langFromUrl(Astro.url));
+const { items, label = t('home.sampleScans') } = Astro.props;
 ---
 
 <div class="strip" role="region" aria-label={label} tabindex="0">
@@ -17,7 +20,7 @@ const { items, label = 'Sample scans' } = Astro.props;
         <li class="frame">
           <Image
             src={item.image}
-            alt={item.caption ? `Sample scan, ${item.caption}` : 'Sample scan'}
+            alt={item.caption ? `${t('gallery.sampleScan')}, ${item.caption}` : t('gallery.sampleScan')}
             widths={[360, 600, 900]}
             sizes="(min-width: 900px) 420px, 70vw"
             loading={i < 3 ? 'eager' : 'lazy'}

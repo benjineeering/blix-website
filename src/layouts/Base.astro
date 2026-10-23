@@ -2,8 +2,10 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import site from '../data/site.json';
 import { url, absoluteUrl } from '../lib/url';
+import { LOCALES, DEFAULT_LANG, langFromUrl, switchLangPath } from '../i18n/config';
+import { useTranslations } from '../i18n/ui';
+import { getSite } from '../i18n/site';
 
 interface Props {
   title?: string;
@@ -12,11 +14,17 @@ interface Props {
   image?: string;
   type?: 'website' | 'article';
   noindex?: boolean;
+  /** Set to false on pages that exist in one language only. */
+  alternates?: boolean;
 }
 
-const { title, description = site.description, image, type = 'website', noindex = false } = Astro.props;
+const lang = langFromUrl(Astro.url);
+const t = useTranslations(lang);
+const site = getSite(lang);
+const { title, description = site.description, image, type = 'website', noindex = false, alternates = true } = Astro.props;
 const fullTitle = title ? `${title} · ${site.name}` : `${site.name} — ${site.tagline}`;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const alternateUrls = LOCALES.map((l) => ({ lang: l, href: new URL(url(switchLangPath(Astro.url.pathname, l)), Astro.site).toString() }));
 const shareImage = image ? new URL(image, Astro.site).toString() : absoluteUrl('/og-default.jpg', Astro.site);
 
 const dayCodes: Record<string, string> = { mon: 'Mo', tue: 'Tu', wed: 'We', thu: 'Th', fri: 'Fr', sat: 'Sa', sun: 'Su' };
@@ -42,7 +50,7 @@ const jsonLd = {
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -50,6 +58,11 @@ const jsonLd = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex" />}
+    {
+      alternates &&
+        alternateUrls.map((alt) => <link rel="alternate" hreflang={alt.lang} href={alt.href} />)
+    }
+    {alternates && <link rel="alternate" hreflang="x-default" href={alternateUrls.find((a) => a.lang === DEFAULT_LANG)!.href} />}
 
     <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
     <link rel="icon" href={url('/favicon-32.png')} type="image/png" sizes="32x32" />
@@ -60,6 +73,7 @@ const jsonLd = {
 
     <meta property="og:type" content={type} />
     <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content={lang === 'de' ? 'de_DE' : 'en_GB'} />
     <meta property="og:title" content={title ?? site.name} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
@@ -69,7 +83,7 @@ const jsonLd = {
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">{t('nav.skip')}</a>
     <Header />
     <main id="main">
       <slot />

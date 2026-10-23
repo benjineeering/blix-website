@@ -1,18 +1,20 @@
 ---
+// One 404 page serves every missing URL, so it speaks both languages.
 import Base from '../layouts/Base.astro';
 import { url } from '../lib/url';
 ---
 
-<Base title="Not found" noindex>
+<Base title="Not found · Nicht gefunden" noindex alternates={false}>
   <section class="container lost">
     <p class="label">Error 404 · Frame missing</p>
     <h1 class="display">Overexposed.</h1>
     <p class="lead">This page doesn't exist (anymore). Maybe it was on the old website — try one of these instead.</p>
+    <p class="lead" lang="de">Diese Seite gibt es nicht (mehr). Vielleicht war sie auf der alten Website – probier es hier:</p>
     <div class="btn-row">
       <a class="btn btn--primary" href={url('/')}>Home</a>
-      <a class="btn" href={url('/lab/')}>Lab prices</a>
+      <a class="btn" href={url('/lab/')}>Lab</a>
       <a class="btn" href={url('/events/')}>Events</a>
-      <a class="btn" href={url('/contact/')}>Contact</a>
+      <a class="btn" href={url('/de/')} lang="de">Deutsch</a>
     </div>
   </section>
 </Base>
@@ -20,7 +22,7 @@ import { url } from '../lib/url';
 <style>
   .lost {
     display: grid;
-    gap: 28px;
+    gap: 24px;
     justify-items: start;
     padding-block: clamp(64px, 14vw, 160px);
   }

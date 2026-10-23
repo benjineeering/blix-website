@@ -3,9 +3,16 @@ import { getCollection } from 'astro:content';
 import Logo from './Logo.astro';
 import Icon from './Icon.astro';
 import OpenStatus from './OpenStatus.astro';
-import site from '../data/site.json';
 import { url } from '../lib/url';
 import { openingHours } from '../lib/time';
+import { langFromUrl, localizePath } from '../i18n/config';
+import { useTranslations } from '../i18n/ui';
+import { getSite } from '../i18n/site';
+
+const lang = langFromUrl(Astro.url);
+const t = useTranslations(lang);
+const site = getSite(lang);
+const link = (path: string) => url(localizePath(path, lang));
 
 const legal = (await getCollection('legal')).sort((a, b) => a.data.order - b.data.order);
 const year = new Date().getFullYear();
@@ -15,12 +22,12 @@ const year = new Date().getFullYear();
   <div class="container">
     <div class="grid">
       <div class="col brand-col">
-        <a href={url('/')} class="logo-link" aria-label="blix — home"><Logo class="logo" /></a>
+        <a href={link('/')} class="logo-link" aria-label={t('nav.home')}><Logo class="logo" /></a>
         <p class="tagline muted">{site.tagline}</p>
       </div>
 
       <div class="col">
-        <h2 class="label">Visit</h2>
+        <h2 class="label">{t('footer.visit')}</h2>
         <address>
           <a href={site.map_url} target="_blank" rel="noopener">
             {site.name}<br />
@@ -31,10 +38,10 @@ const year = new Date().getFullYear();
       </div>
 
       <div class="col">
-        <h2 class="label">Hours</h2>
+        <h2 class="label">{t('footer.hours')}</h2>
         <dl class="hours">
           {
-            openingHours.map((h) => (
+            openingHours(lang).map((h) => (
               <div>
                 <dt>{h.label}</dt>
                 <dd class="mono">{h.time}</dd>
@@ -47,21 +54,21 @@ const year = new Date().getFullYear();
       </div>
 
       <div class="col">
-        <h2 class="label">Follow</h2>
+        <h2 class="label">{t('footer.follow')}</h2>
         <ul class="links">
-          <li><a href={url('/contact/')}><Icon name="mail" />Contact form</a></li>
+          <li><a href={link('/contact/')}><Icon name="mail" />{t('footer.contactForm')}</a></li>
           <li><a href={site.instagram_url} target="_blank" rel="noopener"><Icon name="instagram" />Instagram</a></li>
-          <li><a href={site.newsletter_url} target="_blank" rel="noopener"><Icon name="arrow" />Newsletter</a></li>
-          <li><a href={url('/events.ics')}><Icon name="calendar" />Events calendar</a></li>
+          <li><a href={site.newsletter_url} target="_blank" rel="noopener"><Icon name="arrow" />{t('footer.newsletter')}</a></li>
+          <li><a href={url('/events.ics')}><Icon name="calendar" />{t('footer.calendar')}</a></li>
         </ul>
       </div>
     </div>
 
     <div class="bottom">
-      <p class="label label--muted">© {year} blix GbR · Munich</p>
+      <p class="label label--muted">© {year} blix GbR · {t('footer.city')}</p>
       <ul class="legal">
-        <li><a href={url('/contact/')}>Contact</a></li>
-        {legal.map((page) => <li><a href={url(`/${page.id}/`)}>{page.data.nav_label}</a></li>)}
+        <li><a href={link('/contact/')}>{t('nav.contact')}</a></li>
+        {legal.map((page) => <li><a href={link(`/${page.id}/`)}>{page.data.nav_label}</a></li>)}
       </ul>
     </div>
   </div>

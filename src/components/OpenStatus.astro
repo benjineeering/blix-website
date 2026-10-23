@@ -2,22 +2,44 @@
 // "Open now · until 19:00" / "Closed · opens Wed 16:00", worked out in the
 // visitor's browser from the opening hours in src/data/site.json.
 import site from '../data/site.json';
+import { langFromUrl } from '../i18n/config';
+import { useTranslations } from '../i18n/ui';
+import { shortDayNames } from '../lib/time';
 
 interface Props {
   class?: string;
 }
 const { class: className } = Astro.props;
+
+const lang = langFromUrl(Astro.url);
+const t = useTranslations(lang);
+const strings = {
+  openUntil: t('status.openUntil'),
+  opensToday: t('status.opensToday'),
+  opensTomorrow: t('status.opensTomorrow'),
+  opensDay: t('status.opensDay'),
+  closed: t('status.closed'),
+  days: shortDayNames(lang),
+};
 ---
 
-<p class:list={['open-status', className]} data-open-status data-hours={JSON.stringify(site.hours)} hidden>
+<p
+  class:list={['open-status', className]}
+  data-open-status
+  data-hours={JSON.stringify(site.hours)}
+  data-strings={JSON.stringify(strings)}
+  hidden
+>
   <span class="dot" aria-hidden="true"></span>
   <span data-text></span>
 </p>
 
 <script>
   const DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-  const LABEL: Record<string, string> = { sun: 'Sun', mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat' };
   type Hours = { days: string[]; open: string; close: string };
+  type Strings = Record<'openUntil' | 'opensToday' | 'opensTomorrow' | 'opensDay' | 'closed', string> & { days: Record<string, string> };
+
+  const fill = (text: string, vars: Record<string, string>) => text.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '');
 
   const toMinutes = (t: string) => {
     const [h, m] = t.split(':').map(Number);
@@ -32,27 +54,30 @@ const { class: className } = Astro.props;
     return { day: get('weekday').toLowerCase().slice(0, 3), minutes: Number(get('hour')) * 60 + Number(get('minute')) };
   }
 
-  function status(hours: Hours[]) {
+  function status(hours: Hours[], s: Strings) {
     const now = munichNow();
     const today = hours.filter((h) => h.days.includes(now.day));
     const openNow = today.find((h) => now.minutes >= toMinutes(h.open) && now.minutes < toMinutes(h.close));
-    if (openNow) return { open: true, text: `Open now · until ${openNow.close}` };
+    if (openNow) return { open: true, text: fill(s.openUntil, { time: openNow.close }) };
 
     const laterToday = today.filter((h) => toMinutes(h.open) > now.minutes).sort((a, b) => toMinutes(a.open) - toMinutes(b.open))[0];
-    if (laterToday) return { open: false, text: `Closed · opens today ${laterToday.open}` };
+    if (laterToday) return { open: false, text: fill(s.opensToday, { time: laterToday.open }) };
 
     const start = DAYS.indexOf(now.day);
     for (let i = 1; i <= 7; i++) {
       const day = DAYS[(start + i) % 7];
       const next = hours.filter((h) => h.days.includes(day)).sort((a, b) => toMinutes(a.open) - toMinutes(b.open))[0];
-      if (next) return { open: false, text: `Closed · opens ${i === 1 ? 'tomorrow' : LABEL[day]} ${next.open}` };
+      if (next) {
+        const text = i === 1 ? fill(s.opensTomorrow, { time: next.open }) : fill(s.opensDay, { day: s.days[day], time: next.open });
+        return { open: false, text };
+      }
     }
-    return { open: false, text: 'Closed' };
+    return { open: false, text: s.closed };
   }
 
   document.querySelectorAll<HTMLElement>('[data-open-status]').forEach((el) => {
     try {
-      const result = status(JSON.parse(el.dataset.hours || '[]'));
+      const result = status(JSON.parse(el.dataset.hours || '[]'), JSON.parse(el.dataset.strings || '{}'));
       el.querySelector('[data-text]')!.textContent = result.text;
       el.classList.toggle('is-open', result.open);
       el.hidden = false;

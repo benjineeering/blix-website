@@ -1,0 +1,106 @@
+---
+import Base from '../../../layouts/Base.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import EventCard from '../../../components/EventCard.astro';
+import Icon from '../../../components/Icon.astro';
+import { sortEvents } from '../../../lib/time';
+import { url } from '../../../lib/url';
+import { langParams, langFromParam } from '../../../i18n/config';
+import { useTranslations } from '../../../i18n/ui';
+import { getLocalized } from '../../../i18n/content';
+import { getSite } from '../../../i18n/site';
+
+export const getStaticPaths = () => langParams().map((params) => ({ params }));
+
+const lang = langFromParam(Astro.params.lang);
+const t = useTranslations(lang);
+const site = getSite(lang);
+const a = (href: string, text: string) => `<a href="${href}" target="_blank" rel="noopener">${text}</a>`;
+
+const { upcoming, past } = sortEvents((await getLocalized('events', lang)).filter((e) => !e.data.draft));
+
+const pastByYear = Object.entries(
+  past.reduce<Record<string, typeof past>>((acc, event) => {
+    (acc[event.data.date.slice(0, 4)] ??= []).push(event);
+    return acc;
+  }, {}),
+).sort(([a], [b]) => Number(b) - Number(a));
+---
+
+<Base title={t('events.title')} description={t('events.description')}>
+  <PageHeader label={t('home.eventsLabel')} title={t('events.title')} intro={t('events.intro')}>
+    <div class="btn-row">
+      <a class="btn" href={url('/events.ics')}><Icon name="calendar" /> {t('events.subscribe')}</a>
+      <a class="btn" href={site.instagram_url} target="_blank" rel="noopener"><Icon name="instagram" /> {t('events.instagram')}</a>
+    </div>
+  </PageHeader>
+
+  <section class="container" aria-labelledby="upcoming-heading">
+    <div class="section-head">
+      <h2 class="h2" id="upcoming-heading">{t('events.comingUp')}</h2>
+    </div>
+    {
+      upcoming.length > 0 ? (
+        <div class="grid">
+          {upcoming.map((event) => <EventCard event={event} />)}
+        </div>
+      ) : (
+        <div class="empty">
+          <p class="h3">{t('events.nothing')}</p>
+          <p
+            class="muted"
+            set:html={t('events.announced', {
+              instagram: a(site.instagram_url, 'Instagram'),
+              newsletter: a(site.newsletter_url, t('footer.newsletter')),
+            })}
+          />
+        </div>
+      )
+    }
+  </section>
+
+  {
+    pastByYear.map(([year, events]) => (
+      <section class="container past" aria-labelledby={`past-${year}`}>
+        <div class="section-head">
+          <h2 class="h2" id={`past-${year}`}>
+            <span class="label label--muted">{t('events.past')}</span>
+            {year}
+          </h2>
+        </div>
+        <div class="grid grid--compact">
+          {events.map((event) => <EventCard event={event} compact />)}
+        </div>
+      </section>
+    ))
+  }
+</Base>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: clamp(16px, 2.5vw, 28px);
+  }
+
+  .grid--compact {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  }
+
+  .past {
+    margin-top: var(--section);
+  }
+
+  .past h2 .label {
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .empty {
+    display: grid;
+    gap: 10px;
+    padding: clamp(28px, 5vw, 48px);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius);
+  }
+</style>

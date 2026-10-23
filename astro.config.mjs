@@ -18,7 +18,12 @@ const withBase = (redirects) =>
 export default defineConfig({
   site,
   base,
-  integrations: [sitemap({ filter: (page) => !page.includes('/admin/') && !page.includes('/contact/thanks') })],
+  integrations: [
+    sitemap({
+      filter: (page) => !page.includes('/admin/') && !page.includes('/contact/thanks'),
+      i18n: { defaultLocale: 'en', locales: { en: 'en', de: 'de' } },
+    }),
+  ],
   image: {
     layout: 'constrained',
     breakpoints: [480, 800, 1200, 1600, 2000],

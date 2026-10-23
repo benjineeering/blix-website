@@ -1,31 +1,43 @@
 ---
 // Renders every entry of the "pages" collection (Lab, Studio, Space, …)
-// and the "legal" collection (Impressum, AGB, Datenschutz) at /<id>/.
+// and the "legal" collection (Impressum, AGB, Datenschutz) at /<id>/ and /de/<id>/.
 import { getCollection, render, type CollectionEntry } from 'astro:content';
-import Base from '../layouts/Base.astro';
-import PageHeader from '../components/PageHeader.astro';
-import Gallery from '../components/Gallery.astro';
-import Icon from '../components/Icon.astro';
-import { md } from '../lib/markdown';
-import { url } from '../lib/url';
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Gallery from '../../components/Gallery.astro';
+import Icon from '../../components/Icon.astro';
+import { md } from '../../lib/markdown';
+import { url } from '../../lib/url';
+import { LOCALES, DEFAULT_LANG, langFromParam, localizePath } from '../../i18n/config';
+import { useTranslations } from '../../i18n/ui';
+import { getLocalized, type Localized } from '../../i18n/content';
 
 type Props =
-  | { kind: 'page'; entry: CollectionEntry<'pages'> }
+  | { kind: 'page'; entry: Localized<'pages'> }
   | { kind: 'legal'; entry: CollectionEntry<'legal'> };
 
 export async function getStaticPaths() {
-  const pages = await getCollection('pages');
   const legal = await getCollection('legal');
-  return [
-    ...pages.map((entry) => ({ params: { page: entry.id }, props: { kind: 'page' as const, entry } })),
-    ...legal.map((entry) => ({ params: { page: entry.id }, props: { kind: 'legal' as const, entry } })),
-  ];
+  const paths = [];
+  for (const lang of LOCALES) {
+    const params = { lang: lang === DEFAULT_LANG ? undefined : lang };
+    for (const entry of await getLocalized('pages', lang)) {
+      paths.push({ params: { ...params, page: entry.id }, props: { kind: 'page' as const, entry } });
+    }
+    for (const entry of legal) {
+      paths.push({ params: { ...params, page: entry.id }, props: { kind: 'legal' as const, entry } });
+    }
+  }
+  return paths;
 }
 
+const lang = langFromParam(Astro.params.lang);
+const t = useTranslations(lang);
 const { kind, entry } = Astro.props;
-const { Content } = await render(entry);
+const { Content } = await render(kind === 'page' ? entry.bodyEntry : entry);
 const page = kind === 'page' ? entry.data : undefined;
-const hasBody = Boolean(entry.body?.trim());
+const hasBody = Boolean((kind === 'page' ? entry.bodyEntry : entry).body?.trim());
+const contactLink = `${url(localizePath('/contact/', lang))}?topic=${entry.id}#message`;
 ---
 
 {
@@ -33,6 +45,7 @@ const hasBody = Boolean(entry.body?.trim());
     <Base title={entry.data.title} noindex={false}>
       <PageHeader title={entry.data.title} />
       <div class="container">
+        {lang !== 'de' && <p class="legal-note label label--muted">{t('legal.germanOnly')}</p>}
         <div class="prose legal" lang="de">
           <Content />
         </div>
@@ -45,10 +58,10 @@ const hasBody = Boolean(entry.body?.trim());
           {page.cta_url && (
             <div class="btn-row">
               <a class="btn btn--primary" href={page.cta_url} target="_blank" rel="noopener">
-                {page.cta_label ?? 'Book online'} <Icon name="arrow" />
+                {page.cta_label ?? t('service.book')} <Icon name="arrow" />
               </a>
-              <a class="btn" href={`${url('/contact/')}?topic=${entry.id}#message`}>
-                Ask a question
+              <a class="btn" href={contactLink}>
+                {t('service.ask')}
               </a>
             </div>
           )}
@@ -72,7 +85,7 @@ const hasBody = Boolean(entry.body?.trim());
             {page.sections.map((section) => (
               <div class="price-card">
                 <h2 class="h2">{section.heading}</h2>
-                {section.text && <div class="text muted" set:html={md(section.text)} />}
+                {section.text && <div class="text muted" set:html={md(section.text, lang)} />}
                 {section.prices.length > 0 && (
                   <dl class="prices">
                     {section.prices.map((row) => (
@@ -83,7 +96,7 @@ const hasBody = Boolean(entry.body?.trim());
                     ))}
                   </dl>
                 )}
-                {section.note && <div class="note" set:html={md(section.note)} />}
+                {section.note && <div class="note" set:html={md(section.note, lang)} />}
               </div>
             ))}
           </section>
@@ -93,7 +106,7 @@ const hasBody = Boolean(entry.body?.trim());
           <section class="section">
             <div class="container">
               <div class="section-head">
-                <h2 class="h2">{page.gallery_heading ?? 'Gallery'}</h2>
+                <h2 class="h2">{page.gallery_heading ?? t('service.gallery')}</h2>
               </div>
               <Gallery items={page.gallery} label={page.gallery_heading} variant={entry.id === 'lab' ? 'scans' : 'photos'} />
             </div>
@@ -111,13 +124,13 @@ const hasBody = Boolean(entry.body?.trim());
         {page.cta_url && (
           <section class="container">
             <div class="cta-band">
-              <p class="h2">Ready to book?</p>
+              <p class="h2">{t('service.ready')}</p>
               <div class="btn-row">
                 <a class="btn btn--primary" href={page.cta_url} target="_blank" rel="noopener">
-                  {page.cta_label ?? 'Book online'} <Icon name="arrow" />
+                  {page.cta_label ?? t('service.book')} <Icon name="arrow" />
                 </a>
-                <a class="btn" href={`${url('/contact/')}?topic=${entry.id}#message`}>
-                  Contact us
+                <a class="btn" href={contactLink}>
+                  {t('service.contact')}
                 </a>
               </div>
             </div>
@@ -244,5 +257,9 @@ const hasBody = Boolean(entry.body?.trim());
 
   .legal {
     font-size: 0.9375rem;
+  }
+
+  .legal-note {
+    margin-bottom: 24px;
   }
 </style>

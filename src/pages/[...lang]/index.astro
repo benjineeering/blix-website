@@ -1,33 +1,47 @@
 ---
-import { getCollection, getEntry } from 'astro:content';
 import { Image } from 'astro:assets';
-import Base from '../layouts/Base.astro';
-import FilmStrip from '../components/FilmStrip.astro';
-import EventCard from '../components/EventCard.astro';
-import PostCard from '../components/PostCard.astro';
-import OpenStatus from '../components/OpenStatus.astro';
-import Icon from '../components/Icon.astro';
-import site from '../data/site.json';
-import { mdInline } from '../lib/markdown';
-import { sortEvents } from '../lib/time';
-import { url } from '../lib/url';
+import Base from '../../layouts/Base.astro';
+import FilmStrip from '../../components/FilmStrip.astro';
+import EventCard from '../../components/EventCard.astro';
+import PostCard from '../../components/PostCard.astro';
+import OpenStatus from '../../components/OpenStatus.astro';
+import Icon from '../../components/Icon.astro';
+import { mdInline } from '../../lib/markdown';
+import { sortEvents } from '../../lib/time';
+import { url } from '../../lib/url';
+import { langParams, langFromParam, localizePath } from '../../i18n/config';
+import { useTranslations } from '../../i18n/ui';
+import { getLocalized, getLocalizedEntry } from '../../i18n/content';
+import { getSite } from '../../i18n/site';
 
-const home = (await getEntry('home', 'index'))!.data;
-const services = (await getCollection('pages')).sort((a, b) => a.data.order - b.data.order);
+export const getStaticPaths = () => langParams().map((params) => ({ params }));
+
+const lang = langFromParam(Astro.params.lang);
+const t = useTranslations(lang);
+const site = getSite(lang);
+const link = (path: string) => url(localizePath(path, lang));
+const a = (href: string, text: string, external = false) =>
+  `<a href="${href}"${external ? ' target="_blank" rel="noopener"' : ''}>${text}</a>`;
+
+const home = (await getLocalizedEntry('home', 'index', lang))!.data;
+const services = (await getLocalized('pages', lang)).sort((a, b) => a.data.order - b.data.order);
 const lab = services.find((s) => s.id === 'lab');
-const { upcoming, past } = sortEvents(await getCollection('events', (e) => !e.data.draft));
-const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) => b.data.date.localeCompare(a.data.date)).slice(0, 2);
+const { upcoming, past } = sortEvents((await getLocalized('events', lang)).filter((e) => !e.data.draft));
+const posts = (await getLocalized('blog', lang))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.localeCompare(a.data.date))
+  .slice(0, 2);
 ---
 
 <Base>
   <section class="hero container">
     <div class="hero-text">
       <OpenStatus class="status" />
-      <h1 class="display" set:html={mdInline(home.heading)} />
+      <h1 class="display" set:html={mdInline(home.heading, lang)} />
       {home.text && <p class="lead">{home.text}</p>}
       <div class="btn-row">
-        <a class="btn btn--primary" href={url('/lab/')}>Lab prices <Icon name="arrow" /></a>
-        <a class="btn" href={site.booking_url} target="_blank" rel="noopener">Book studio or space <Icon name="external" /></a>
+        <a class="btn btn--primary" href={link('/lab/')}>{t('home.labPrices')} <Icon name="arrow" /></a>
+        <a class="btn" href={site.booking_url} target="_blank" rel="noopener">{t('home.book')} <Icon name="external" /></a>
       </div>
     </div>
 
@@ -52,10 +66,10 @@ const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) =>
       <section class="strip-section" aria-labelledby="strip-heading">
         <div class="container section-head">
           <div>
-            <p class="label">Sample scans</p>
-            <h2 class="h2" id="strip-heading">{home.strip_heading ?? 'Sample scans'}</h2>
+            <p class="label">{t('home.sampleScans')}</p>
+            <h2 class="h2" id="strip-heading">{home.strip_heading ?? t('home.sampleScans')}</h2>
           </div>
-          <a class="link-arrow" href={url('/lab/')}>Development & scanning <Icon name="arrow" /></a>
+          <a class="link-arrow" href={link('/lab/')}>{t('home.devScanning')} <Icon name="arrow" /></a>
         </div>
         <FilmStrip items={lab.data.gallery} />
       </section>
@@ -65,14 +79,14 @@ const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) =>
   <section class="section container" aria-labelledby="services-heading">
     <div class="section-head">
       <div>
-        <p class="label">What we do</p>
-        <h2 class="h2" id="services-heading">Lab · Studio · Space</h2>
+        <p class="label">{t('home.whatWeDo')}</p>
+        <h2 class="h2" id="services-heading">{services.map((s) => s.data.nav_label).join(' · ')}</h2>
       </div>
     </div>
     <div class="services">
       {
         services.map((service) => (
-          <a class="service" href={url(`/${service.id}/`)}>
+          <a class="service" href={link(`/${service.id}/`)}>
             <span class="num mono">{String(service.data.order).padStart(2, '0')}</span>
             <h3 class="service-title">{service.data.nav_label}</h3>
             <p class="muted">{service.data.summary}</p>
@@ -89,10 +103,10 @@ const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) =>
   <section class="section container" aria-labelledby="events-heading">
     <div class="section-head">
       <div>
-        <p class="label">Workshops · Photo walks · Exhibitions</p>
-        <h2 class="h2" id="events-heading">{upcoming.length ? 'Coming up' : 'Events'}</h2>
+        <p class="label">{t('home.eventsLabel')}</p>
+        <h2 class="h2" id="events-heading">{upcoming.length ? t('home.comingUp') : t('home.events')}</h2>
       </div>
-      <a class="link-arrow" href={url('/events/')}>All events <Icon name="arrow" /></a>
+      <a class="link-arrow" href={link('/events/')}>{t('home.allEvents')} <Icon name="arrow" /></a>
     </div>
 
     {
@@ -103,14 +117,17 @@ const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) =>
       ) : (
         <>
           <div class="empty">
-            <p class="h3">Nothing scheduled right now — new dates are coming soon.</p>
-            <p class="muted">
-              Follow us on <a href={site.instagram_url} target="_blank" rel="noopener">Instagram</a>, sign up for the{' '}
-              <a href={site.newsletter_url} target="_blank" rel="noopener">newsletter</a> or{' '}
-              <a href={url('/events.ics')}>subscribe to the calendar</a> to hear first.
-            </p>
+            <p class="h3">{t('home.nothing')}</p>
+            <p
+              class="muted"
+              set:html={t('home.hearFirst', {
+                instagram: a(site.instagram_url, 'Instagram', true),
+                newsletter: a(site.newsletter_url, t('footer.newsletter'), true),
+                calendar: a(url('/events.ics'), t('home.subscribeCalendar')),
+              })}
+            />
           </div>
-          <p class="label label--muted recent-label">Recently</p>
+          <p class="label label--muted recent-label">{t('home.recently')}</p>
           <div class="event-grid event-grid--compact">
             {past.slice(0, 4).map((event) => <EventCard event={event} compact />)}
           </div>
@@ -124,10 +141,10 @@ const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) =>
       <section class="section container" aria-labelledby="blog-heading">
         <div class="section-head">
           <div>
-            <p class="label">Notes from the lab</p>
-            <h2 class="h2" id="blog-heading">Blog</h2>
+            <p class="label">{t('home.notes')}</p>
+            <h2 class="h2" id="blog-heading">{t('home.blog')}</h2>
           </div>
-          <a class="link-arrow" href={url('/blog/')}>All posts <Icon name="arrow" /></a>
+          <a class="link-arrow" href={link('/blog/')}>{t('home.allPosts')} <Icon name="arrow" /></a>
         </div>
         <div class="posts">
           {posts.map((post) => <PostCard post={post} />)}

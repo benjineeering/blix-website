@@ -1,35 +1,53 @@
 ---
-import { getCollection } from 'astro:content';
-import Base from '../../layouts/Base.astro';
-import PageHeader from '../../components/PageHeader.astro';
-import OpenStatus from '../../components/OpenStatus.astro';
-import Icon from '../../components/Icon.astro';
-import site from '../../data/site.json';
-import { openingHours } from '../../lib/time';
-import { url } from '../../lib/url';
+import Base from '../../../layouts/Base.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import OpenStatus from '../../../components/OpenStatus.astro';
+import Icon from '../../../components/Icon.astro';
+import { openingHours } from '../../../lib/time';
+import { url } from '../../../lib/url';
+import { langParams, langFromParam, localizePath } from '../../../i18n/config';
+import { useTranslations } from '../../../i18n/ui';
+import { getLocalized } from '../../../i18n/content';
+import { getSite } from '../../../i18n/site';
+
+export const getStaticPaths = () => langParams().map((params) => ({ params }));
+
+const lang = langFromParam(Astro.params.lang);
+const t = useTranslations(lang);
+const site = getSite(lang);
+const link = (path: string) => url(localizePath(path, lang));
 
 // Topics for the form; ?topic=<value> in the URL preselects one (e.g. from the Studio page).
-const pages = (await getCollection('pages')).sort((a, b) => a.data.order - b.data.order);
+const pages = (await getLocalized('pages', lang)).sort((a, b) => a.data.order - b.data.order);
 const topics = [
-  { value: 'general', label: 'General question' },
+  { value: 'general', label: t('contact.topicGeneral') },
   ...pages.map((p) => ({ value: p.id, label: p.data.nav_label })),
-  { value: 'events', label: 'Events & workshops' },
+  { value: 'events', label: t('contact.topicEvents') },
 ];
 
 const formKey = site.contact_form_key;
-const thanksUrl = new URL(url('/contact/thanks/'), Astro.site).toString();
+const thanksUrl = new URL(link('/contact/thanks/'), Astro.site).toString();
+const privacyLink = `<a href="${link('/datenschutz/')}">${t('contact.privacyLink')}</a>`;
+const instagramLink = `<a href="${site.instagram_url}" target="_blank" rel="noopener">Instagram</a>`;
 ---
 
-<Base title="Contact" description={site.contact_intro}>
-  <PageHeader label="Say hello" title="Contact" intro={site.contact_intro} />
+<Base title={t('contact.title')} description={site.contact_intro}>
+  <PageHeader label={t('contact.label')} title={t('contact.title')} intro={site.contact_intro} />
 
   <div class="container layout">
     <section class="form-card" id="message" aria-labelledby="form-heading">
-      <h2 class="label" id="form-heading">Send us a message</h2>
+      <h2 class="label" id="form-heading">{t('contact.formHeading')}</h2>
 
       {
         formKey ? (
-          <form class="form" action="https://api.web3forms.com/submit" method="POST" data-contact-form>
+          <form
+            class="form"
+            action="https://api.web3forms.com/submit"
+            method="POST"
+            data-contact-form
+            data-sending={t('contact.sending')}
+            data-error={t('contact.error')}
+          >
             <input type="hidden" name="access_key" value={formKey} />
             <input type="hidden" name="subject" value="New message from the blix website" />
             <input type="hidden" name="from_name" value="blix website" />
@@ -38,71 +56,65 @@ const thanksUrl = new URL(url('/contact/thanks/'), Astro.site).toString();
             <input type="checkbox" name="botcheck" class="trap" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
             <label>
-              <span>Name *</span>
+              <span>{t('contact.name')}</span>
               <input name="name" autocomplete="name" required maxlength="120" />
             </label>
             <label>
-              <span>Email *</span>
+              <span>{t('contact.email')}</span>
               <input name="email" type="email" autocomplete="email" required maxlength="200" />
             </label>
             <label>
-              <span>Phone</span>
+              <span>{t('contact.phone')}</span>
               <input name="phone" type="tel" autocomplete="tel" maxlength="40" />
             </label>
             <label>
-              <span>Topic</span>
+              <span>{t('contact.topic')}</span>
               <select name="topic">
                 {topics.map((t) => <option value={t.label} data-topic={t.value}>{t.label}</option>)}
               </select>
             </label>
             <label class="full">
-              <span>Message *</span>
+              <span>{t('contact.message')}</span>
               <textarea name="message" rows="7" required maxlength="5000" />
             </label>
-            <p class="full privacy muted">
-              We use your details only to answer your message. The form is delivered by Web3Forms. See our{' '}
-              <a href={url('/datenschutz/')}>privacy policy</a>.
-            </p>
+            <p class="full privacy muted" set:html={t('contact.privacy', { privacy: privacyLink })} />
             <div class="full submit-row">
               <button class="btn btn--primary" type="submit" data-submit>
-                Send message <Icon name="arrow" />
+                {t('contact.send')} <Icon name="arrow" />
               </button>
               <p class="status" role="status" aria-live="polite" data-status></p>
             </div>
           </form>
         ) : (
           <div class="form-off">
-            <p class="h3">The contact form is being set up.</p>
-            <p class="muted">
-              Until then, send us a message on <a href={site.instagram_url} target="_blank" rel="noopener">Instagram</a> or come by
-              during opening hours.
-            </p>
+            <p class="h3">{t('contact.offTitle')}</p>
+            <p class="muted" set:html={t('contact.offText', { instagram: instagramLink })} />
           </div>
         )
       }
 
       <div class="sent" hidden data-sent>
-        <p class="h3">Thanks — your message is on its way!</p>
-        <p class="muted">We usually reply within a few days. For anything urgent, come by during opening hours.</p>
+        <p class="h3">{t('contact.sentTitle')}</p>
+        <p class="muted">{t('contact.sentText')}</p>
       </div>
     </section>
 
     <aside class="side">
       <section class="card">
-        <h2 class="label">Visit</h2>
+        <h2 class="label">{t('contact.visit')}</h2>
         <address>
           {site.name}<br />
           {site.address.street}<br />
           {site.address.postcode} {site.address.city}
         </address>
-        <a class="link-arrow" href={site.map_url} target="_blank" rel="noopener">Open in maps <Icon name="external" /></a>
+        <a class="link-arrow" href={site.map_url} target="_blank" rel="noopener">{t('contact.maps')} <Icon name="external" /></a>
       </section>
 
       <section class="card">
-        <h2 class="label">Opening hours</h2>
+        <h2 class="label">{t('contact.hours')}</h2>
         <dl class="hours">
           {
-            openingHours.map((h) => (
+            openingHours(lang).map((h) => (
               <div>
                 <dt>{h.longLabel}</dt>
                 <dd class="mono">{h.time}</dd>
@@ -115,11 +127,11 @@ const thanksUrl = new URL(url('/contact/thanks/'), Astro.site).toString();
       </section>
 
       <section class="card">
-        <h2 class="label">Stay in the loop</h2>
+        <h2 class="label">{t('contact.loop')}</h2>
         <ul class="links">
           <li><a href={site.instagram_url} target="_blank" rel="noopener"><Icon name="instagram" /> Instagram</a></li>
-          <li><a href={site.newsletter_url} target="_blank" rel="noopener"><Icon name="mail" /> Newsletter</a></li>
-          <li><a href={url('/events.ics')}><Icon name="calendar" /> Events calendar</a></li>
+          <li><a href={site.newsletter_url} target="_blank" rel="noopener"><Icon name="mail" /> {t('footer.newsletter')}</a></li>
+          <li><a href={url('/events.ics')}><Icon name="calendar" /> {t('footer.calendar')}</a></li>
           {site.phone && <li><a href={`tel:${site.phone.replace(/\s/g, '')}`}><Icon name="arrow" /> {site.phone}</a></li>}
         </ul>
       </section>
@@ -158,7 +170,7 @@ const thanksUrl = new URL(url('/contact/thanks/'), Astro.site).toString();
       data.subject = `blix website · ${data.topic} · ${data.name}`;
 
       button.disabled = true;
-      status.textContent = 'Sending…';
+      status.textContent = form.dataset.sending ?? '';
       status.classList.remove('error');
 
       try {
@@ -173,7 +185,7 @@ const thanksUrl = new URL(url('/contact/thanks/'), Astro.site).toString();
         sent.hidden = false;
         sent.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } catch {
-        status.textContent = 'Sorry, that didn’t work. Please try again in a moment, or message us on Instagram.';
+        status.textContent = form.dataset.error ?? '';
         status.classList.add('error');
         button.disabled = false;
       }

@@ -4,13 +4,17 @@ import { Image } from 'astro:assets';
 import Icon from './Icon.astro';
 import { url } from '../lib/url';
 import { formatDate } from '../lib/time';
+import { langFromUrl, localizePath } from '../i18n/config';
+import { useTranslations } from '../i18n/ui';
 
 interface Props {
   post: CollectionEntry<'blog'>;
 }
 const { post } = Astro.props;
 const { title, date, author, excerpt, cover } = post.data;
-const href = url(`/blog/${post.id}/`);
+const lang = langFromUrl(Astro.url);
+const t = useTranslations(lang);
+const href = url(localizePath(`/blog/${post.id}/`, lang));
 ---
 
 <article class="post-card">
@@ -23,11 +27,11 @@ const href = url(`/blog/${post.id}/`);
   }
   <div class="body">
     <p class="label label--muted">
-      <time datetime={date}>{formatDate(date, { weekday: false })}</time>{author && ` · ${author}`}
+      <time datetime={date}>{formatDate(date, { weekday: false, lang })}</time>{author && ` · ${author}`}
     </p>
     <h3 class="title"><a href={href}>{title}</a></h3>
     {excerpt && <p class="muted">{excerpt}</p>}
-    <span class="link-arrow yellow" aria-hidden="true">Read <Icon name="arrow" /></span>
+    <span class="link-arrow yellow" aria-hidden="true">{t('home.read')} <Icon name="arrow" /></span>
   </div>
 </article>
 

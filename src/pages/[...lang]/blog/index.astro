@@ -1,0 +1,34 @@
+---
+import Base from '../../../layouts/Base.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import PostCard from '../../../components/PostCard.astro';
+import { langParams, langFromParam } from '../../../i18n/config';
+import { useTranslations } from '../../../i18n/ui';
+import { getLocalized } from '../../../i18n/content';
+
+export const getStaticPaths = () => langParams().map((params) => ({ params }));
+
+const lang = langFromParam(Astro.params.lang);
+const t = useTranslations(lang);
+const posts = (await getLocalized('blog', lang))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.localeCompare(a.data.date));
+---
+
+<Base title={t('blog.title')} description={t('blog.description')}>
+  <PageHeader label={t('blog.label')} title={t('blog.title')} intro={t('blog.intro')} />
+
+  <section class="container">
+    <div class="posts">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .posts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+    gap: clamp(40px, 6vw, 64px) clamp(24px, 4vw, 48px);
+  }
+</style>

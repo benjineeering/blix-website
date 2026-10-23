@@ -1,18 +1,29 @@
 ---
-import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
 import { Image, getImage } from 'astro:assets';
-import Base from '../../layouts/Base.astro';
-import Icon from '../../components/Icon.astro';
-import { formatDate } from '../../lib/time';
-import { url } from '../../lib/url';
+import Base from '../../../layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import { formatDate } from '../../../lib/time';
+import { url } from '../../../lib/url';
+import { LOCALES, DEFAULT_LANG, langFromParam, localizePath } from '../../../i18n/config';
+import { useTranslations } from '../../../i18n/ui';
+import { getLocalized, type Localized } from '../../../i18n/content';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', (p) => !p.data.draft);
-  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+  const paths = [];
+  for (const lang of LOCALES) {
+    for (const post of await getLocalized('blog', lang)) {
+      if (post.data.draft) continue;
+      paths.push({ params: { lang: lang === DEFAULT_LANG ? undefined : lang, slug: post.id }, props: { post } });
+    }
+  }
+  return paths;
 }
 
-const { post } = Astro.props as { post: CollectionEntry<'blog'> };
-const { Content } = await render(post);
+const lang = langFromParam(Astro.params.lang);
+const t = useTranslations(lang);
+const { post } = Astro.props as { post: Localized<'blog'> };
+const { Content } = await render(post.bodyEntry);
 const { title, date, author, excerpt, cover } = post.data;
 const shareImage = cover ? (await getImage({ src: cover, width: 1200, format: 'jpg' })).src : undefined;
 ---
@@ -20,9 +31,9 @@ const shareImage = cover ? (await getImage({ src: cover, width: 1200, format: 'j
 <Base title={title} description={excerpt} image={shareImage} type="article">
   <article>
     <header class="container head">
-      <a class="back link-arrow" href={url('/blog/')}><Icon name="chevron-left" /> Blog</a>
+      <a class="back link-arrow" href={url(localizePath('/blog/', lang))}><Icon name="chevron-left" /> {t('blog.title')}</a>
       <p class="label">
-        <time datetime={date}>{formatDate(date, { weekday: false })}</time>{author && ` · ${author}`}
+        <time datetime={date}>{formatDate(date, { weekday: false, lang })}</time>{author && ` · ${author}`}
       </p>
       <h1 class="title">{title}</h1>
       {excerpt && <p class="lead">{excerpt}</p>}
@@ -37,7 +48,8 @@ const shareImage = cover ? (await getImage({ src: cover, width: 1200, format: 'j
     }
 
     <div class="container body">
-      <div class="prose">
+      {!post.bodyTranslated && <p class="untranslated label label--muted">{t('content.onlyOther')}</p>}
+      <div class="prose" lang={post.bodyTranslated ? undefined : 'en'}>
         <Content />
       </div>
     </div>
@@ -77,8 +89,14 @@ const shareImage = cover ? (await getImage({ src: cover, width: 1200, format: 'j
 
   .body {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     padding-top: clamp(40px, 6vw, 72px);
+  }
+
+  .body .untranslated {
+    width: 100%;
+    max-width: 42rem;
   }
 
   .body .prose {

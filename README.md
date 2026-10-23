@@ -18,7 +18,15 @@ Built with [Astro](https://astro.build), hosted on GitHub Pages, edited with [Sv
 | Lab, Studio or Space prices, texts, photos | **Lab, Studio & Space** |
 | Add a workshop / photo walk / party | **Events → New Event** |
 | Write a blog post | **Blog → New Post** |
-| Impressum, AGB, Datenschutz | **Legal pages** |
+| Impressum, AGB, Datenschutz | **Legal pages (German)** |
+
+**English & German.** The site has an English version (`/`) and a German one (`/de/`), with an EN / DE switch in the header.
+
+- In the editor every event, post and page has an **English and a German** side. Only English is required.
+- Anything left empty in German shows the English text on the German site (with a small "only available in English" note on events and posts), so you can publish in English first and translate later — or never.
+- Dates, photos, ticket and booking links are shared: you only enter them on the English side.
+- The **Translate** button (top of the German side, or next to each field) pre-fills the German from the English. The first time, it asks for a translation API key — e.g. a free [Google Cloud Translation](https://cloud.google.com/translate) key (500,000 characters/month free). The key stays in your browser. Always read the result before saving.
+- The legal pages are German only and are shown on both versions.
 
 **Good to know**
 
@@ -28,9 +36,10 @@ Built with [Astro](https://astro.build), hosted on GitHub Pages, edited with [Sv
 - **Photos** are resized and converted automatically when you upload them — just upload the normal file. Portrait (4:5) works best for event posters, e.g. the Instagram post.
 - In blog posts, put **two images directly below each other** (no empty line between) to show them side by side, as in the Frontier comparison post.
 - In the home page headline, wrap words in `*asterisks*` to make them yellow.
-- Prices are plain text, so write them exactly as they should appear (`8.99 €`, `+ 1.99 €`, `on request`).
+- Prices are plain text, so write them exactly as they should appear (`8.99 €`, `+ 1.99 €`, `on request` — in German `8,99 €`, `auf Anfrage`).
+- Links to other pages (e.g. `/blog/fuji-frontier/`) can be written the same way in both languages; on the German site they automatically lead to the German page.
 
-You can also edit any file directly on GitHub (pencil icon) — the content lives in [`src/content/`](src/content) and [`src/data/site.json`](src/data/site.json).
+You can also edit any file directly on GitHub (pencil icon) — the content lives in [`src/content/`](src/content) and [`src/data/`](src/data). German versions sit next to the English ones: `index.md` (English) and `index.de.md` (German), `site.json` and `site.de.json`.
 
 ---
 
@@ -91,18 +100,20 @@ With the dev server running, the editor offers **Work with Local Repository** (C
 
 ```
 src/
-  content/
+  content/           index.md = English, index.de.md = German translation (optional)
     home/            home page text + photo
-    pages/<id>/      Lab, Studio, Space (prices, facts, galleries) → /<id>/
-    events/<id>/     one folder per event (index.md + poster) → /events/<id>/
-    blog/<id>/       one folder per post (index.md + images) → /blog/<id>/
-    legal/           Impressum, AGB, Datenschutz → /<file name>/
-  data/site.json     global settings (hours, address, links)
+    pages/<id>/      Lab, Studio, Space (prices, facts, galleries) → /<id>/ and /de/<id>/
+    events/<id>/     one folder per event (+ poster) → /events/<id>/
+    blog/<id>/       one folder per post (+ images) → /blog/<id>/
+    legal/           Impressum, AGB, Datenschutz (German only) → /<file name>/
+  data/site.json     global settings (hours, address, links); site.de.json = German texts
+  i18n/              languages: config.ts (locales, URLs), ui.ts (fixed interface text in EN/DE),
+                     content.ts (lays German over English, falls back to English)
   content.config.ts  content schemas — keep in sync with public/admin/config.yml
   components/        Header, Footer, cards, gallery, film strip, …
   layouts/Base.astro page shell, meta tags, structured data
   lib/               time zone & opening-hours logic, Markdown helpers, calendar feed
-  pages/             routes
+  pages/[...lang]/   routes — each builds the English page and the /de/ page
   styles/global.css  design tokens (colours, type) and shared styles
 public/admin/        the editor (Sveltia CMS) and its configuration
 01_logo/             original logo files — kept locally, not in the repo (the site uses an SVG traced from the yellow PNG)

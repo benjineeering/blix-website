@@ -21,8 +21,18 @@ const optionalTime = z.preprocess(
   z.string().regex(/^\d{1,2}:\d{2}/, 'Use the format HH:MM').optional(),
 );
 
+// English entries are index.md, German translations index.de.md in the same
+// folder. Both get the folder name as id ("lab", "2026-09-26-wiesn-photowalk").
+const entryId = ({ entry }: { entry: string }) => entry.replace(/(\.de)?\.md$/, '').replace(/\/index$/, '');
+const english = (base: string, pattern = '*/index.md') => glob({ pattern, base, generateId: entryId });
+const german = (base: string, pattern = '*/index.de.md') => glob({ pattern, base, generateId: entryId });
+
+// German files only hold the translated texts (dates, images, links etc. come
+// from the English entry), and any of them may still be missing.
+const translation = z.looseObject({});
+
 const home = defineCollection({
-  loader: glob({ pattern: 'index.md', base: './src/content/home' }),
+  loader: english('./src/content/home', 'index.md'),
   schema: ({ image }) =>
     z.object({
       heading: z.string(),
@@ -34,7 +44,7 @@ const home = defineCollection({
 });
 
 const pages = defineCollection({
-  loader: glob({ pattern: '*/index.md', base: './src/content/pages' }),
+  loader: english('./src/content/pages'),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -64,7 +74,7 @@ const pages = defineCollection({
 });
 
 const events = defineCollection({
-  loader: glob({ pattern: '*/index.md', base: './src/content/events' }),
+  loader: english('./src/content/events'),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -81,7 +91,7 @@ const events = defineCollection({
 });
 
 const blog = defineCollection({
-  loader: glob({ pattern: '*/index.md', base: './src/content/blog' }),
+  loader: english('./src/content/blog'),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -93,8 +103,9 @@ const blog = defineCollection({
     }),
 });
 
+// Legal pages exist in German only and are shown on both language versions.
 const legal = defineCollection({
-  loader: glob({ pattern: '*.md', base: './src/content/legal' }),
+  loader: glob({ pattern: '*.md', base: './src/content/legal', generateId: entryId }),
   schema: z.object({
     title: z.string(),
     nav_label: z.string(),
@@ -102,4 +113,9 @@ const legal = defineCollection({
   }),
 });
 
-export const collections = { home, pages, events, blog, legal };
+const homeDe = defineCollection({ loader: german('./src/content/home', 'index.de.md'), schema: translation });
+const pagesDe = defineCollection({ loader: german('./src/content/pages'), schema: translation });
+const eventsDe = defineCollection({ loader: german('./src/content/events'), schema: translation });
+const blogDe = defineCollection({ loader: german('./src/content/blog'), schema: translation });
+
+export const collections = { home, pages, events, blog, legal, homeDe, pagesDe, eventsDe, blogDe };

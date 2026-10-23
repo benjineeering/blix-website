@@ -1,0 +1,33 @@
+---
+// Shown after sending the contact form in browsers without JavaScript.
+import Base from '../../../layouts/Base.astro';
+import { url } from '../../../lib/url';
+import { langParams, langFromParam, localizePath } from '../../../i18n/config';
+import { useTranslations } from '../../../i18n/ui';
+
+export const getStaticPaths = () => langParams().map((params) => ({ params }));
+
+const lang = langFromParam(Astro.params.lang);
+const t = useTranslations(lang);
+---
+
+<Base title={t('thanks.title')} noindex>
+  <section class="container thanks">
+    <p class="label">{t('thanks.title')}</p>
+    <h1 class="h1">{t('thanks.heading')}</h1>
+    <p class="lead">{t('thanks.text')}</p>
+    <div class="btn-row">
+      <a class="btn btn--primary" href={url(localizePath('/', lang))}>{t('thanks.home')}</a>
+      <a class="btn" href={url(localizePath('/events/', lang))}>{t('thanks.events')}</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .thanks {
+    display: grid;
+    gap: 24px;
+    justify-items: start;
+    padding-block: clamp(64px, 12vw, 140px);
+  }
+</style>

@@ -7,10 +7,10 @@ summary: blix, Munich Street Collective & Sisterhood In Focus team up for a trip
 poster: ./poster.jpg
 ---
 
-SAVE THE DATE // 16. Mai 2026 // Es wird bunt! 🥳
+SAVE THE DATE // 16 May 2026 // It's going to be colourful! 🥳
 
-Blix, Munich Street Collective & Sisterhood In Focus tun sich zusammen und organisieren einen TRIPLE PHOTOWALK für Euch auf der Krachparade [@mehrlaermfuermuenchen](https://www.instagram.com/mehrlaermfuermuenchen/). Das hat's noch nie gegeben – kommt und lasst uns gemeinsam laut, bunt und kreativ sein! 🌈
+blix, Munich Street Collective & Sisterhood In Focus are teaming up to organise a TRIPLE PHOTOWALK for you at the Krachparade [@mehrlaermfuermuenchen](https://www.instagram.com/mehrlaermfuermuenchen/). This has never happened before – come along and let's be loud, colourful and creative together! 🌈
 
-Weitere Infos kommen, stay tuned! 🤩
+More info to follow, stay tuned! 🤩
 
 📸 [@munich_fotastic](https://www.instagram.com/munich_fotastic/) 🫶🏾

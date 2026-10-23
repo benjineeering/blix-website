@@ -1,35 +1,58 @@
 ---
-import { getCollection } from 'astro:content';
 import Logo from './Logo.astro';
 import Icon from './Icon.astro';
-import site from '../data/site.json';
 import { url } from '../lib/url';
+import { LOCALES, LANG_NAMES, langFromUrl, localizePath, switchLangPath } from '../i18n/config';
+import { useTranslations } from '../i18n/ui';
+import { getLocalized } from '../i18n/content';
+import { getSite } from '../i18n/site';
 
-const pages = (await getCollection('pages')).sort((a, b) => a.data.order - b.data.order);
+const lang = langFromUrl(Astro.url);
+const t = useTranslations(lang);
+const site = getSite(lang);
+const link = (path: string) => url(localizePath(path, lang));
+
+const pages = (await getLocalized('pages', lang)).sort((a, b) => a.data.order - b.data.order);
 const links = [
-  ...pages.map((p) => ({ href: url(`/${p.id}/`), label: p.data.nav_label })),
-  { href: url('/events/'), label: 'Events' },
-  { href: url('/blog/'), label: 'Blog' },
-  { href: url('/contact/'), label: 'Contact' },
+  ...pages.map((p) => ({ href: link(`/${p.id}/`), label: p.data.nav_label })),
+  { href: link('/events/'), label: t('nav.events') },
+  { href: link('/blog/'), label: t('nav.blog') },
+  { href: link('/contact/'), label: t('nav.contact') },
 ];
 
+// The 404 page has no counterpart, so its language switch goes to the home page.
+const isNotFound = /\/404(\.html)?\/?$/.test(Astro.url.pathname);
+const langHref = (l: (typeof LOCALES)[number]) => url(isNotFound ? localizePath('/', l) : switchLangPath(Astro.url.pathname, l));
+
 const current = Astro.url.pathname.replace(/\/?$/, '/');
-const isCurrent = (href: string) => current === href || (href !== url('/') && current.startsWith(href));
+const isCurrent = (href: string) => current === href || (href !== link('/') && current.startsWith(href));
 ---
 
 <header class="site-header" data-header>
   <div class="container bar">
-    <a class="brand" href={url('/')} aria-label="blix — home">
+    <a class="brand" href={link('/')} aria-label={t('nav.home')}>
       <Logo class="brand-logo" />
     </a>
 
+    <div class="lang-switch" role="group" aria-label={t('nav.language')}>
+      {
+        LOCALES.map((l) =>
+          l === lang ? (
+            <span class="lang-current" lang={l} aria-current="true" title={LANG_NAMES[l]}>{l.toUpperCase()}</span>
+          ) : (
+            <a href={langHref(l)} lang={l} hreflang={l} title={LANG_NAMES[l]}>{l.toUpperCase()}</a>
+          ),
+        )
+      }
+    </div>
+
     <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-menu-toggle>
-      <span class="visually-hidden">Menu</span>
+      <span class="visually-hidden">{t('nav.menu')}</span>
       <Icon name="menu" class="icon-open" />
       <Icon name="close" class="icon-close" />
     </button>
 
-    <nav id="site-nav" class="nav" aria-label="Main">
+    <nav id="site-nav" class="nav" aria-label={t('nav.main')}>
       <ul>
         {
           links.map((link) => (
@@ -42,7 +65,7 @@ const isCurrent = (href: string) => current === href || (href !== url('/') && cu
         }
       </ul>
       <a class="btn store" href={site.store_url} target="_blank" rel="noopener">
-        Store <Icon name="external" />
+        {t('nav.store')} <Icon name="external" />
       </a>
     </nav>
   </div>
@@ -87,13 +110,55 @@ const isCurrent = (href: string) => current === href || (href !== url('/') && cu
   .bar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 24px;
+    gap: 20px;
     height: var(--header-h);
+  }
+
+  .nav {
+    order: 1;
+  }
+
+  .lang-switch {
+    order: 2;
+    display: flex;
+    gap: 2px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+  }
+
+  .lang-switch a,
+  .lang-current {
+    display: grid;
+    place-items: center;
+    min-width: 34px;
+    height: 30px;
+    border-radius: 3px;
+    text-decoration: none;
+  }
+
+  .lang-switch a {
+    color: var(--text-muted);
+  }
+
+  .lang-switch a:hover {
+    color: var(--text);
+    background: var(--bg-raised);
+  }
+
+  .lang-current {
+    background: var(--yellow);
+    color: var(--yellow-ink);
+  }
+
+  .menu-toggle {
+    order: 3;
   }
 
   .brand {
     display: block;
+    margin-right: auto;
     color: var(--yellow);
     flex: none;
   }

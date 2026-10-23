@@ -1,19 +1,31 @@
 ---
-import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
 import { Image, getImage } from 'astro:assets';
-import Base from '../../layouts/Base.astro';
-import Icon from '../../components/Icon.astro';
-import site from '../../data/site.json';
-import { dateLabel, timeRange, isUpcoming } from '../../lib/time';
-import { url } from '../../lib/url';
+import Base from '../../../layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import { dateLabel, timeRange, isUpcoming } from '../../../lib/time';
+import { url } from '../../../lib/url';
+import { LOCALES, DEFAULT_LANG, langFromParam, localizePath } from '../../../i18n/config';
+import { useTranslations } from '../../../i18n/ui';
+import { getLocalized, type Localized } from '../../../i18n/content';
+import { getSite } from '../../../i18n/site';
 
 export async function getStaticPaths() {
-  const events = await getCollection('events', (e) => !e.data.draft);
-  return events.map((event) => ({ params: { slug: event.id }, props: { event } }));
+  const paths = [];
+  for (const lang of LOCALES) {
+    for (const event of await getLocalized('events', lang)) {
+      if (event.data.draft) continue;
+      paths.push({ params: { lang: lang === DEFAULT_LANG ? undefined : lang, slug: event.id }, props: { event } });
+    }
+  }
+  return paths;
 }
 
-const { event } = Astro.props as { event: CollectionEntry<'events'> };
-const { Content } = await render(event);
+const lang = langFromParam(Astro.params.lang);
+const t = useTranslations(lang);
+const site = getSite(lang);
+const { event } = Astro.props as { event: Localized<'events'> };
+const { Content } = await render(event.bodyEntry);
 const { title, summary, poster, location, ticket_url } = event.data;
 const upcoming = isUpcoming(event);
 const time = timeRange(event);
@@ -22,32 +34,32 @@ const shareImage = poster ? (await getImage({ src: poster, width: 1200, format: 
 
 <Base title={title} description={summary} image={shareImage}>
   <article class="container event">
-    <a class="back link-arrow" href={url('/events/')}><Icon name="chevron-left" /> All events</a>
+    <a class="back link-arrow" href={url(localizePath('/events/', lang))}><Icon name="chevron-left" /> {t('event.all')}</a>
 
     <div class="layout">
       <div class="poster">
-        {poster && <Image src={poster} alt={`Poster: ${title}`} widths={[480, 800, 1200]} sizes="(min-width: 960px) 480px, 92vw" loading="eager" />}
+        {poster && <Image src={poster} alt={t('event.poster', { title })} widths={[480, 800, 1200]} sizes="(min-width: 960px) 480px, 92vw" loading="eager" />}
       </div>
 
       <div class="details">
-        <p class="label">{upcoming ? 'Upcoming event' : 'Past event'}</p>
+        <p class="label">{upcoming ? t('event.upcoming') : t('event.pastEvent')}</p>
         <h1 class="h1">{title}</h1>
 
         <dl class="meta">
           <div>
-            <dt><Icon name="calendar" /><span class="visually-hidden">Date</span></dt>
-            <dd>{dateLabel(event)}</dd>
+            <dt><Icon name="calendar" /><span class="visually-hidden">{t('event.date')}</span></dt>
+            <dd>{dateLabel(event, lang)}</dd>
           </div>
           {
             time && (
               <div>
-                <dt><Icon name="clock" /><span class="visually-hidden">Time</span></dt>
+                <dt><Icon name="clock" /><span class="visually-hidden">{t('event.time')}</span></dt>
                 <dd class="mono">{time}</dd>
               </div>
             )
           }
           <div>
-            <dt><Icon name="pin" /><span class="visually-hidden">Location</span></dt>
+            <dt><Icon name="pin" /><span class="visually-hidden">{t('event.location')}</span></dt>
             <dd>{location ?? `${site.name}, ${site.address.street}`}</dd>
           </div>
         </dl>
@@ -57,17 +69,18 @@ const shareImage = poster ? (await getImage({ src: poster, width: 1200, format: 
             <div class="btn-row">
               {ticket_url && (
                 <a class="btn btn--primary" href={ticket_url} target="_blank" rel="noopener">
-                  <Icon name="ticket" /> Get tickets
+                  <Icon name="ticket" /> {t('event.getTickets')}
                 </a>
               )}
               <a class="btn" href={url(`/events/${event.id}.ics`)}>
-                <Icon name="calendar" /> Add to calendar
+                <Icon name="calendar" /> {t('event.addToCalendar')}
               </a>
             </div>
           )
         }
 
-        <div class="prose">
+        {!event.bodyTranslated && <p class="untranslated label label--muted">{t('content.onlyOther')}</p>}
+        <div class="prose" lang={event.bodyTranslated ? undefined : 'en'}>
           <Content />
         </div>
       </div>

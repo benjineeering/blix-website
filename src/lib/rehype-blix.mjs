@@ -6,8 +6,10 @@
  *   using each image's title ("caption") as the caption. Two images on
  *   consecutive lines therefore show side by side.
  * - hides email addresses from bots (see protect-email.mjs)
+ * - in German files (*.de.md), points internal links to the German pages
  */
 import { protectedLinkAttributes, obfuscatedLabel } from './protect-email.mjs';
+import { localizeHref } from './localize-link.mjs';
 
 function replaceText(node, search, replacement) {
   for (const child of node.children ?? []) {
@@ -38,7 +40,7 @@ export default function rehypeBlix({ base = '/' } = {}) {
     return { type: 'element', tagName: 'figure', properties: {}, children };
   }
 
-  function walk(node) {
+  function walk(node, lang) {
     if (!node.children) return;
     node.children = node.children.map((child) => {
       if (child.type !== 'element') return child;
@@ -54,7 +56,7 @@ export default function rehypeBlix({ base = '/' } = {}) {
           child.properties.target = '_blank';
           child.properties.rel = ['noopener', 'noreferrer'];
         } else {
-          child.properties.href = withBase(href);
+          child.properties.href = withBase(localizeHref(href, lang));
         }
       }
       if (child.tagName === 'img' && child.properties?.src) {
@@ -69,17 +71,20 @@ export default function rehypeBlix({ base = '/' } = {}) {
             tagName: 'div',
             properties: { className: ['figure-row'], dataCount: String(content.length) },
             children: content.map((img) => {
-              walk({ children: [img] });
+              walk({ children: [img] }, lang);
               return toFigure(img);
             }),
           };
         }
       }
 
-      walk(child);
+      walk(child, lang);
       return child;
     });
   }
 
-  return (tree) => walk(tree);
+  return (tree, file) => {
+    const path = String(file?.path ?? file?.history?.[0] ?? '');
+    walk(tree, /\.de\.md$/.test(path) ? 'de' : 'en');
+  };
 }
