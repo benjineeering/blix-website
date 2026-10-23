@@ -134,4 +134,50 @@ export const openingHours = (lang: Lang = 'en') =>
     time: `${h.open} – ${h.close}`,
   }));
 
+// ---------------------------------------------------------------- exceptions (holidays, sick days, special hours)
+
+export type HoursException = {
+  date: string;
+  end_date?: string;
+  closed?: boolean;
+  open?: string;
+  close?: string;
+  note?: string;
+};
+
+/** YAML/JSON dates may arrive as Date objects or with a time part; keep YYYY-MM-DD. */
+const isoDay = (value: unknown) =>
+  value instanceof Date ? value.toISOString().slice(0, 10) : typeof value === 'string' ? value.slice(0, 10) : '';
+
+export function addDays(date: string, days: number): string {
+  const d = new Date(`${date}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Exceptions that haven't ended yet, sorted by date, with display labels.
+ * `withinDays` limits them to those starting in the next N days.
+ */
+export function upcomingExceptions(
+  exceptions: unknown,
+  lang: Lang,
+  { today = todayInMunich(), withinDays }: { today?: string; withinDays?: number } = {},
+) {
+  const list = (Array.isArray(exceptions) ? exceptions : []) as HoursException[];
+  return list
+    .map((ex) => {
+      const start = isoDay(ex.date);
+      const end = isoDay(ex.end_date) || start;
+      const special = !ex.closed && ex.open && ex.close ? { open: shortTime(ex.open)!, close: shortTime(ex.close)! } : undefined;
+      const dates =
+        end !== start
+          ? `${formatDate(start, { lang, year: false })} – ${formatDate(end, { lang, year: false })}`
+          : formatDate(start, { lang, year: false });
+      return { start, end, closed: !special, special, note: ex.note?.trim() || undefined, dates };
+    })
+    .filter((ex) => ex.start && ex.end >= today && (withinDays === undefined || ex.start <= addDays(today, withinDays)))
+    .sort((a, b) => a.start.localeCompare(b.start));
+}
+
 export { DAY_KEYS };

@@ -88,7 +88,25 @@ singletons:
               - { label: Sunday, value: sun }
           - { name: open, label: Opens, widget: datetime, type: time, format: 'HH:mm' }
           - { name: close, label: Closes, widget: datetime, type: time, format: 'HH:mm' }
-      - { name: hours_note, label: Opening hours note, widget: string, i18n: true, required: false, hint: 'e.g. “Closed 24 Dec – 6 Jan”. Leave empty when not needed.' }
+      - { name: hours_note, label: Opening hours note, widget: string, i18n: true, required: false, hint: 'A general note under the opening hours. For holidays, sick days or special hours use “Exceptions to opening hours” below.' }
+      - name: hours_exceptions
+        label: Exceptions to opening hours
+        label_singular: Exception
+        widget: list
+        i18n: duplicate
+        required: false
+        summary: "{{fields.date | date('DD.MM.YYYY')}} · {{fields.note}}"
+        hint: 'Sick days, holidays or special hours. They show in a banner at the top of the site (from 2 weeks before), under the opening hours and in the “Open now / Closed” badge. Past ones disappear by themselves — delete them whenever you like.'
+        fields:
+          - { name: date, label: Date, widget: datetime, type: date, hint: 'The day (or the first day).' }
+          - { name: end_date, label: Last day, widget: datetime, type: date, required: false, hint: 'Only if it covers several days, e.g. a holiday.' }
+          - { name: closed, label: Closed all day, widget: boolean, default: true, hint: 'Switch off to set special opening hours for this day instead.' }
+          - { name: open, label: Opens, widget: datetime, type: time, format: 'HH:mm', required: false, hint: 'Only for special hours.' }
+          - { name: close, label: Closes, widget: datetime, type: time, format: 'HH:mm', required: false }
+          - { name: note, label: Note for visitors, widget: string, i18n: true, required: false, hint: 'e.g. “Sorry, we’re ill” / “Christmas break”.' }
+      - { name: announcement, label: Announcement banner, widget: text, i18n: true, required: false, hint: 'A short message shown at the top of every page. Leave empty for no banner.' }
+      - { name: announcement_link, label: Announcement link, widget: string, required: false, hint: 'Optional, e.g. /events/ or a full https:// link.' }
+      - { name: announcement_until, label: Show announcement until, widget: datetime, type: date, required: false, hint: 'The banner disappears by itself after this day. Leave empty to show it until you clear the text.' }
       - { name: instagram_url, label: Instagram link, widget: string }
       - { name: newsletter_url, label: Newsletter sign-up link, widget: string }
       - { name: store_url, label: Online store link, widget: string }

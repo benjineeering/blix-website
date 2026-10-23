@@ -1,0 +1,119 @@
+---
+// Banner at the top of every page: the announcement from Site settings plus
+// opening-hours exceptions (holidays, sick days, special hours) starting in the
+// next two weeks. Items whose last day has passed are also removed in the
+// browser, in case the nightly rebuild hasn't happened yet.
+import Icon from './Icon.astro';
+import { url, isExternal } from '../lib/url';
+import { todayInMunich, upcomingExceptions } from '../lib/time';
+import { langFromUrl, localizePath } from '../i18n/config';
+import { useTranslations } from '../i18n/ui';
+import { getSite } from '../i18n/site';
+
+const lang = langFromUrl(Astro.url);
+const t = useTranslations(lang);
+const site = getSite(lang);
+const today = todayInMunich();
+
+const until = site.announcement_until?.slice(0, 10) || undefined;
+const announcement = site.announcement?.trim() && (!until || until >= today) ? site.announcement.trim() : '';
+const link = site.announcement_link?.trim();
+const href = link ? (isExternal(link) ? link : url(localizePath(link, lang))) : undefined;
+
+const items = [
+  ...(announcement ? [{ text: announcement, until, href }] : []),
+  ...upcomingExceptions(site.hours_exceptions, lang, { today, withinDays: 14 }).map((ex) => ({
+    text: `${ex.dates}: ${ex.special ? `${ex.special.open} – ${ex.special.close}` : t('hours.closed')}${ex.note ? ` · ${ex.note}` : ''}`,
+    until: ex.end,
+    href: undefined,
+  })),
+];
+---
+
+{
+  items.length > 0 && (
+    <aside class="notice" aria-label={t('notice.label')} data-notice>
+      <div class="container inner">
+        <span class="dot" aria-hidden="true" />
+        <ul>
+          {items.map((item) => (
+            <li data-until={item.until}>
+              {item.href ? (
+                <a href={item.href} {...(isExternal(item.href) ? { target: '_blank', rel: 'noopener' } : {})}>
+                  {item.text} <Icon name="arrow" />
+                </a>
+              ) : (
+                item.text
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </aside>
+  )
+}
+
+<script>
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' }).format(new Date());
+  document.querySelectorAll<HTMLElement>('[data-notice]').forEach((notice) => {
+    notice.querySelectorAll<HTMLElement>('[data-until]').forEach((item) => {
+      if (item.dataset.until && item.dataset.until < today) item.remove();
+    });
+    if (!notice.querySelector('li')) notice.remove();
+  });
+</script>
+
+<style>
+  .notice {
+    position: relative;
+    z-index: 60;
+    background: var(--yellow);
+    color: var(--yellow-ink);
+  }
+
+  .inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding-block: 10px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    margin-top: 0.45em;
+    border-radius: 50%;
+    background: var(--yellow-ink);
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 28px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: currentColor;
+  }
+
+  a:hover {
+    color: inherit;
+    text-decoration-thickness: 2px;
+  }
+
+  .notice :global(svg) {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.15em;
+  }
+</style>

@@ -17,7 +17,9 @@ Built with [Astro](https://astro.build), hosted on GitHub Pages, edited with [Sv
 
 | What you want to change | Where in the editor |
 | --- | --- |
-| Opening hours, address, Instagram/newsletter/store/booking links, contact form key | **Site settings** |
+| **Closed today / holiday / special hours** | **Site settings → Exceptions to opening hours** |
+| A message at the top of every page | **Site settings → Announcement banner** |
+| Regular opening hours, address, Instagram/newsletter/store/booking links, contact form key | **Site settings** |
 | Home page headline, intro and photo | **Home page** |
 | Lab, Studio or Space prices, texts, photos | **Lab, Studio & Space** |
 | Add a workshop / photo walk / party | **Events → New Event** |
@@ -34,6 +36,7 @@ Built with [Astro](https://astro.build), hosted on GitHub Pages, edited with [Sv
 
 **Good to know**
 
+- **Sick day or holiday?** Add an *Exception to opening hours* (date, or first + last day; *Closed all day*, or switch that off and enter special hours; optional note). It appears in a yellow banner at the top of the site from two weeks before, under the opening hours, and the "Open now / Closed" badge takes it into account. Past exceptions disappear on their own.
 - **Events** sort themselves: upcoming events show under *Coming up*, finished ones move to the archive automatically (the site rebuilds every night). The ticket button disappears once an event is over.
 - Leave **Starts at** empty for all-day things like deadlines. Leave **Location** empty if it's at blix.
 - Tick **Draft** to save something without showing it on the website yet.

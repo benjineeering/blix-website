@@ -1,0 +1,98 @@
+---
+// Upcoming exceptions to the opening hours, shown under the regular hours.
+import { upcomingExceptions } from '../lib/time';
+import { langFromUrl } from '../i18n/config';
+import { useTranslations } from '../i18n/ui';
+import { getSite } from '../i18n/site';
+
+interface Props {
+  class?: string;
+  limit?: number;
+}
+const { class: className, limit = 5 } = Astro.props;
+
+const lang = langFromUrl(Astro.url);
+const t = useTranslations(lang);
+const exceptions = upcomingExceptions(getSite(lang).hours_exceptions, lang).slice(0, limit);
+---
+
+{
+  exceptions.length > 0 && (
+    <div class:list={['exceptions', className]} data-exceptions-list>
+      <p class="title">{t('hours.changed')}</p>
+      <ul>
+        {exceptions.map((ex) => (
+          <li data-until={ex.end}>
+            <span class="dates">{ex.dates}</span>
+            <span class:list={['state', 'mono', { closed: !ex.special }]}>
+              {ex.special ? `${ex.special.open} – ${ex.special.close}` : t('hours.closed')}
+            </span>
+            {ex.note && <span class="note">{ex.note}</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+<script>
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' }).format(new Date());
+  document.querySelectorAll<HTMLElement>('[data-exceptions-list]').forEach((list) => {
+    list.querySelectorAll<HTMLElement>('[data-until]').forEach((item) => {
+      if (item.dataset.until && item.dataset.until < today) item.remove();
+    });
+    if (!list.querySelector('li')) list.remove();
+  });
+</script>
+
+<style>
+  .exceptions {
+    align-self: stretch;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+
+  .title {
+    margin-bottom: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+    font-size: 0.875rem;
+  }
+
+  li + li {
+    margin-top: 8px;
+  }
+
+  .dates {
+    color: var(--text);
+  }
+
+  .state {
+    color: var(--text-muted);
+  }
+
+  .state.closed {
+    color: var(--safelight);
+  }
+
+  .note {
+    flex-basis: 100%;
+    color: var(--text-muted);
+  }
+</style>

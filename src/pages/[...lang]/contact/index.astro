@@ -2,6 +2,7 @@
 import Base from '../../../layouts/Base.astro';
 import PageHeader from '../../../components/PageHeader.astro';
 import OpenStatus from '../../../components/OpenStatus.astro';
+import HoursExceptions from '../../../components/HoursExceptions.astro';
 import Icon from '../../../components/Icon.astro';
 import { openingHours } from '../../../lib/time';
 import { url } from '../../../lib/url';
@@ -123,6 +124,7 @@ const instagramLink = `<a href="${site.instagram_url}" target="_blank" rel="noop
           }
         </dl>
         {site.hours_note && <p class="muted">{site.hours_note}</p>}
+        <HoursExceptions />
         <OpenStatus />
       </section>
 

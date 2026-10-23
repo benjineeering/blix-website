@@ -27,6 +27,10 @@ const en = {
   'status.opensDay': 'Closed · opens {day} {time}',
   'status.closed': 'Closed',
 
+  'hours.closed': 'Closed',
+  'hours.changed': 'Changed hours',
+  'notice.label': 'Notice',
+
   'home.labPrices': 'Lab prices',
   'home.book': 'Book studio or space',
   'home.sampleScans': 'Sample scans',
@@ -144,6 +148,10 @@ const de: Record<Key, string> = {
   'status.opensTomorrow': 'Geschlossen · öffnet morgen um {time}',
   'status.opensDay': 'Geschlossen · öffnet {day} um {time}',
   'status.closed': 'Geschlossen',
+
+  'hours.closed': 'Geschlossen',
+  'hours.changed': 'Geänderte Öffnungszeiten',
+  'notice.label': 'Hinweis',
 
   'home.labPrices': 'Laborpreise',
   'home.book': 'Studio oder Space buchen',
