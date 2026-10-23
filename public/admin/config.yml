@@ -8,6 +8,9 @@ backend:
   name: github
   repo: benjineeering/blix-website
   branch: main
+  # "Sign In with GitHub" needs an OAuth helper service (see README); until one
+  # is set up, only access-token sign-in is offered.
+  auth_methods: [token]
 
 site_url: https://benjineeering.github.io/blix-website
 display_url: https://benjineeering.github.io/blix-website

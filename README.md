@@ -8,7 +8,9 @@ Built with [Astro](https://astro.build), hosted on GitHub Pages, edited with [Sv
 ## ✏️ Editing the website (no coding needed)
 
 1. Open **`<website address>/admin/`** (e.g. `https://www.blixmunich.de/admin/`).
-2. Click **Sign In Using Access Token** and follow the link it shows to create a GitHub token (you need to be a member of the GitHub repository — ask Ben). The token is remembered in your browser.
+2. Click **Sign In Using Access Token** and paste a GitHub token. The token is remembered in your browser. Which token:
+   - **Your account owns the repository:** use the link shown in the dialog (a fine-grained token).
+   - **Your account was added as a collaborator** (anyone else): first accept the collaborator invitation, then create a **classic** token with the `repo` scope at [github.com/settings/tokens/new?scopes=repo](https://github.com/settings/tokens/new?scopes=repo&description=blix%20website%20editor). GitHub doesn't let fine-grained tokens work on someone else's personal repository.
 3. Edit, then press **Save**. The website updates automatically **2–3 minutes** later.
 
 | What you want to change | Where in the editor |
