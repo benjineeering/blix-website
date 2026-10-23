@@ -1,0 +1,153 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import site from '../../data/site.json';
+import { dateLabel, timeRange, isUpcoming } from '../../lib/time';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const events = await getCollection('events', (e) => !e.data.draft);
+  return events.map((event) => ({ params: { slug: event.id }, props: { event } }));
+}
+
+const { event } = Astro.props as { event: CollectionEntry<'events'> };
+const { Content } = await render(event);
+const { title, summary, poster, location, ticket_url } = event.data;
+const upcoming = isUpcoming(event);
+const time = timeRange(event);
+const shareImage = poster ? (await getImage({ src: poster, width: 1200, format: 'jpg' })).src : undefined;
+---
+
+<Base title={title} description={summary} image={shareImage}>
+  <article class="container event">
+    <a class="back link-arrow" href={url('/events/')}><Icon name="chevron-left" /> All events</a>
+
+    <div class="layout">
+      <div class="poster">
+        {poster && <Image src={poster} alt={`Poster: ${title}`} widths={[480, 800, 1200]} sizes="(min-width: 960px) 480px, 92vw" loading="eager" />}
+      </div>
+
+      <div class="details">
+        <p class="label">{upcoming ? 'Upcoming event' : 'Past event'}</p>
+        <h1 class="h1">{title}</h1>
+
+        <dl class="meta">
+          <div>
+            <dt><Icon name="calendar" /><span class="visually-hidden">Date</span></dt>
+            <dd>{dateLabel(event)}</dd>
+          </div>
+          {
+            time && (
+              <div>
+                <dt><Icon name="clock" /><span class="visually-hidden">Time</span></dt>
+                <dd class="mono">{time}</dd>
+              </div>
+            )
+          }
+          <div>
+            <dt><Icon name="pin" /><span class="visually-hidden">Location</span></dt>
+            <dd>{location ?? `${site.name}, ${site.address.street}`}</dd>
+          </div>
+        </dl>
+
+        {
+          upcoming && (
+            <div class="btn-row">
+              {ticket_url && (
+                <a class="btn btn--primary" href={ticket_url} target="_blank" rel="noopener">
+                  <Icon name="ticket" /> Get tickets
+                </a>
+              )}
+              <a class="btn" href={url(`/events/${event.id}.ics`)}>
+                <Icon name="calendar" /> Add to calendar
+              </a>
+            </div>
+          )
+        }
+
+        <div class="prose">
+          <Content />
+        </div>
+      </div>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .event {
+    padding-top: clamp(24px, 5vw, 56px);
+  }
+
+  .back {
+    margin-bottom: clamp(24px, 4vw, 48px);
+    color: var(--text-muted);
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(32px, 6vw, 80px);
+    align-items: start;
+  }
+
+  .poster {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+  }
+
+  .poster :global(img) {
+    width: 100%;
+    border-radius: var(--radius);
+  }
+
+  .details {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .details .h1 {
+    font-size: clamp(2.5rem, 6vw, 4.75rem);
+  }
+
+  .meta {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 20px 0;
+    border-block: 1px solid var(--line);
+  }
+
+  .meta div {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .meta dt {
+    display: flex;
+    color: var(--yellow);
+  }
+
+  .meta dt :global(svg) {
+    width: 20px;
+    height: 20px;
+  }
+
+  .meta dd {
+    margin: 0;
+  }
+
+  @media (max-width: 860px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+
+    .poster {
+      position: static;
+      max-width: 520px;
+    }
+  }
+</style>

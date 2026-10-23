@@ -1,0 +1,109 @@
+---
+// "Open now · until 19:00" / "Closed · opens Wed 16:00", worked out in the
+// visitor's browser from the opening hours in src/data/site.json.
+import site from '../data/site.json';
+
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<p class:list={['open-status', className]} data-open-status data-hours={JSON.stringify(site.hours)} hidden>
+  <span class="dot" aria-hidden="true"></span>
+  <span data-text></span>
+</p>
+
+<script>
+  const DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  const LABEL: Record<string, string> = { sun: 'Sun', mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat' };
+  type Hours = { days: string[]; open: string; close: string };
+
+  const toMinutes = (t: string) => {
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + m;
+  };
+
+  function munichNow() {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Europe/Berlin', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+    }).formatToParts(new Date());
+    const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+    return { day: get('weekday').toLowerCase().slice(0, 3), minutes: Number(get('hour')) * 60 + Number(get('minute')) };
+  }
+
+  function status(hours: Hours[]) {
+    const now = munichNow();
+    const today = hours.filter((h) => h.days.includes(now.day));
+    const openNow = today.find((h) => now.minutes >= toMinutes(h.open) && now.minutes < toMinutes(h.close));
+    if (openNow) return { open: true, text: `Open now · until ${openNow.close}` };
+
+    const laterToday = today.filter((h) => toMinutes(h.open) > now.minutes).sort((a, b) => toMinutes(a.open) - toMinutes(b.open))[0];
+    if (laterToday) return { open: false, text: `Closed · opens today ${laterToday.open}` };
+
+    const start = DAYS.indexOf(now.day);
+    for (let i = 1; i <= 7; i++) {
+      const day = DAYS[(start + i) % 7];
+      const next = hours.filter((h) => h.days.includes(day)).sort((a, b) => toMinutes(a.open) - toMinutes(b.open))[0];
+      if (next) return { open: false, text: `Closed · opens ${i === 1 ? 'tomorrow' : LABEL[day]} ${next.open}` };
+    }
+    return { open: false, text: 'Closed' };
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-open-status]').forEach((el) => {
+    try {
+      const result = status(JSON.parse(el.dataset.hours || '[]'));
+      el.querySelector('[data-text]')!.textContent = result.text;
+      el.classList.toggle('is-open', result.open);
+      el.hidden = false;
+    } catch {
+      /* leave hidden */
+    }
+  });
+</script>
+
+<style>
+  .open-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .open-status[hidden] {
+    display: none;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-faint);
+  }
+
+  .is-open {
+    color: var(--text);
+  }
+
+  .is-open .dot {
+    background: var(--yellow);
+    box-shadow: 0 0 0 0 rgb(254 199 0 / 0.6);
+    animation: pulse 2.4s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgb(254 199 0 / 0.55);
+    }
+    70% {
+      box-shadow: 0 0 0 8px rgb(254 199 0 / 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgb(254 199 0 / 0);
+    }
+  }
+</style>

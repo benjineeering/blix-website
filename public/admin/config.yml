@@ -1,0 +1,255 @@
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms@0.233.1/schema/sveltia-cms.json
+#
+# Configuration of the website editor at /admin/ (Sveltia CMS).
+# Every save in the editor is a commit to the GitHub repository, which
+# rebuilds and publishes the website automatically within a few minutes.
+
+backend:
+  name: github
+  repo: benjineeering/blix-website
+  branch: main
+
+site_url: https://benjineeering.github.io/blix-website
+display_url: https://benjineeering.github.io/blix-website
+
+# Default upload folder (only used where no entry-specific folder is set)
+media_folder: public/uploads
+public_folder: /uploads
+
+# Uploaded photos are converted to WebP and scaled down to max. 2400 px,
+# so huge camera files don't bloat the repository.
+media_libraries:
+  default:
+    config:
+      transformations:
+        raster_image:
+          format: webp
+          quality: 85
+          width: 2400
+          height: 2400
+
+output:
+  omit_empty_optional_fields: true
+
+# ------------------------------------------------------------------ single pages
+singletons:
+  - name: settings
+    label: Site settings
+    icon: settings
+    file: src/data/site.json
+    fields:
+      - { name: name, label: Business name, widget: string }
+      - { name: tagline, label: Tagline, widget: string, hint: 'Shown in the footer and browser tab.' }
+      - { name: description, label: Search engine description, widget: text, hint: 'One or two sentences shown by Google and when links are shared.' }
+      - { name: email, label: Email, widget: string }
+      - { name: phone, label: Phone, widget: string, required: false }
+      - name: address
+        label: Address
+        widget: object
+        fields:
+          - { name: street, label: Street, widget: string }
+          - { name: postcode, label: Postcode, widget: string }
+          - { name: city, label: City, widget: string }
+          - { name: country, label: Country code, widget: string, default: DE }
+      - { name: map_url, label: Map link, widget: string }
+      - name: hours
+        label: Opening hours
+        label_singular: Opening time
+        widget: list
+        summary: '{{fields.days}} · {{fields.open}}–{{fields.close}}'
+        hint: 'Used for the footer, the contact page and the live “Open now / Closed” badge.'
+        fields:
+          - name: days
+            label: Days
+            widget: select
+            multiple: true
+            options:
+              - { label: Monday, value: mon }
+              - { label: Tuesday, value: tue }
+              - { label: Wednesday, value: wed }
+              - { label: Thursday, value: thu }
+              - { label: Friday, value: fri }
+              - { label: Saturday, value: sat }
+              - { label: Sunday, value: sun }
+          - { name: open, label: Opens, widget: datetime, type: time, format: 'HH:mm' }
+          - { name: close, label: Closes, widget: datetime, type: time, format: 'HH:mm' }
+      - { name: hours_note, label: Opening hours note, widget: string, required: false, hint: 'e.g. “Closed 24 Dec – 6 Jan”. Leave empty when not needed.' }
+      - { name: instagram_url, label: Instagram link, widget: string }
+      - { name: newsletter_url, label: Newsletter sign-up link, widget: string }
+      - { name: store_url, label: Online store link, widget: string }
+      - { name: booking_url, label: Booking link (studio & space), widget: string }
+      - { name: contact_intro, label: Contact page intro, widget: text }
+      - name: contact_form_endpoint
+        label: Contact form address
+        widget: string
+        required: false
+        hint: 'Leave empty to hide the contact form. To enable it, paste the form endpoint from a form service such as Formspree or Web3Forms.'
+
+  - name: home
+    label: Home page
+    icon: home
+    file: src/content/home/index.md
+    media_folder: ''
+    public_folder: ''
+    fields:
+      - { name: heading, label: Headline, widget: string, hint: 'Wrap words in *asterisks* to highlight them in yellow.' }
+      - { name: text, label: Intro text, widget: text, required: false }
+      - { name: hero_image, label: Photo, widget: image, required: false }
+      - { name: hero_caption, label: Photo caption, widget: string, required: false, hint: 'Shown like film-edge print, e.g. “Portra 160 · scanned at blix”.' }
+      - { name: strip_heading, label: Sample scans heading, widget: string, required: false, hint: 'The film strip shows the sample scans from the Lab page.' }
+
+# ------------------------------------------------------------------ collections
+collections:
+  - name: events
+    label: Events
+    label_singular: Event
+    icon: event
+    description: Workshops, photo walks, exhibitions and parties. Past events move to the archive automatically.
+    folder: src/content/events
+    path: '{{slug}}/index'
+    slug: "{{date | date('YYYY-MM-DD')}}-{{slug}}"
+    media_folder: ''
+    public_folder: ''
+    create: true
+    summary: "{{date | date('DD.MM.YYYY')}} · {{title}}"
+    sortable_fields:
+      fields: [date, title]
+      default:
+        field: date
+        direction: descending
+    preview_path: 'events/{{slug}}/'
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: date, label: Date, widget: datetime, type: date }
+      - { name: start_time, label: Starts at, widget: datetime, type: time, format: 'HH:mm', required: false, hint: 'Leave empty for all-day events or deadlines.' }
+      - { name: end_time, label: Ends at, widget: datetime, type: time, format: 'HH:mm', required: false }
+      - { name: end_date, label: End date, widget: datetime, type: date, required: false, hint: 'Only for events that run over several days.' }
+      - { name: location, label: Location / meeting point, widget: string, required: false, hint: 'Leave empty if the event is at blix.' }
+      - { name: summary, label: Short summary, widget: text, required: false, hint: 'One or two sentences for event cards, calendars and search engines.' }
+      - { name: poster, label: Poster, widget: image, required: false, hint: 'Portrait format (4:5) works best — the Instagram post works fine.' }
+      - { name: ticket_url, label: Ticket link, widget: string, required: false, hint: 'e.g. the SumUp store product. The button is hidden once the event is over.' }
+      - { name: draft, label: Draft (hide from website), widget: boolean, default: false, required: false }
+      - { name: body, label: Description, widget: markdown }
+
+  - name: blog
+    label: Blog
+    label_singular: Post
+    icon: article
+    folder: src/content/blog
+    path: '{{slug}}/index'
+    slug: '{{slug}}'
+    media_folder: ''
+    public_folder: ''
+    create: true
+    summary: "{{date | date('DD.MM.YYYY')}} · {{title}}"
+    sortable_fields:
+      fields: [date, title]
+      default:
+        field: date
+        direction: descending
+    preview_path: 'blog/{{slug}}/'
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: date, label: Date, widget: datetime, type: date, default: '{{now}}' }
+      - { name: author, label: Author, widget: string, required: false }
+      - { name: excerpt, label: Teaser, widget: text, required: false, hint: 'Shown on the blog overview and when the post is shared.' }
+      - { name: cover, label: Cover image, widget: image, required: false }
+      - { name: draft, label: Draft (hide from website), widget: boolean, default: false, required: false }
+      - name: body
+        label: Text
+        widget: markdown
+        hint: 'Tip: put two images directly below each other (no empty line in between) to show them side by side. An image “title” becomes its caption.'
+
+  - name: pages
+    label: Lab, Studio & Space
+    label_singular: Page
+    icon: storefront
+    description: Prices, opening facts and galleries of the service pages.
+    media_folder: ''
+    public_folder: ''
+    files:
+      - name: lab
+        label: Lab
+        file: src/content/pages/lab/index.md
+        preview_path: lab/
+        fields: &service_fields
+          - { name: title, label: Page title, widget: string }
+          - { name: nav_label, label: Menu label, widget: string }
+          - { name: order, label: Position in menu, widget: number, value_type: int, default: 9 }
+          - { name: summary, label: Summary (home page card), widget: text }
+          - { name: from_price, label: Price teaser (home page card), widget: string, required: false, hint: 'e.g. “from 30 € / hr”' }
+          - { name: intro, label: Intro text, widget: text, required: false }
+          - name: facts
+            label: Key facts
+            label_singular: Fact
+            widget: list
+            required: false
+            summary: '{{fields.label}}: {{fields.value}}'
+            hint: 'Short facts shown in a row below the intro, e.g. turnaround times.'
+            fields:
+              - { name: label, label: Label, widget: string }
+              - { name: value, label: Value, widget: string }
+          - name: sections
+            label: Price sections
+            label_singular: Section
+            widget: list
+            required: false
+            summary: '{{fields.heading}}'
+            fields:
+              - { name: heading, label: Heading, widget: string }
+              - { name: text, label: Text, widget: markdown, required: false, buttons: [bold, italic, link], editor_components: [] }
+              - name: prices
+                label: Prices
+                label_singular: Price
+                widget: list
+                required: false
+                summary: '{{fields.item}} — {{fields.price}}'
+                fields:
+                  - { name: item, label: Item, widget: string }
+                  - { name: price, label: Price, widget: string, hint: 'Write it exactly as it should appear, e.g. “8.99 €”, “+ 1.99 €” or “on request”.' }
+              - { name: note, label: Note, widget: markdown, required: false, buttons: [bold, italic, link], editor_components: [] }
+          - { name: cta_label, label: Booking button text, widget: string, required: false }
+          - { name: cta_url, label: Booking button link, widget: string, required: false, hint: 'Leave empty to hide the booking buttons.' }
+          - { name: gallery_heading, label: Gallery heading, widget: string, required: false }
+          - name: gallery
+            label: Gallery
+            label_singular: Photo
+            widget: list
+            required: false
+            summary: '{{fields.caption}}'
+            fields:
+              - { name: image, label: Photo, widget: image }
+              - { name: caption, label: Caption, widget: string, required: false }
+          - { name: body, label: Fine print (e.g. cancellation terms), widget: markdown, required: false }
+      - name: studio
+        label: Studio
+        file: src/content/pages/studio/index.md
+        preview_path: studio/
+        fields: *service_fields
+      - name: space
+        label: Space
+        file: src/content/pages/space/index.md
+        preview_path: space/
+        fields: *service_fields
+
+  - name: legal
+    label: Legal pages
+    label_singular: Legal page
+    icon: gavel
+    files:
+      - name: impressum
+        label: Impressum
+        file: src/content/legal/impressum.md
+        fields: &legal_fields
+          - { name: title, label: Title, widget: string }
+          - { name: nav_label, label: Footer link text, widget: string }
+          - { name: order, label: Position in footer, widget: number, value_type: int }
+          - { name: body, label: Text, widget: markdown }
+      - name: agb
+        label: AGB
+        file: src/content/legal/agb.md
+        fields: *legal_fields
+      - name: datenschutz
+        label: Datenschutz
+        file: src/content/legal/datenschutz.md
+        fields: *legal_fields

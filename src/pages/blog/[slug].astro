@@ -1,0 +1,88 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { formatDate } from '../../lib/time';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', (p) => !p.data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props as { post: CollectionEntry<'blog'> };
+const { Content } = await render(post);
+const { title, date, author, excerpt, cover } = post.data;
+const shareImage = cover ? (await getImage({ src: cover, width: 1200, format: 'jpg' })).src : undefined;
+---
+
+<Base title={title} description={excerpt} image={shareImage} type="article">
+  <article>
+    <header class="container head">
+      <a class="back link-arrow" href={url('/blog/')}><Icon name="chevron-left" /> Blog</a>
+      <p class="label">
+        <time datetime={date}>{formatDate(date, { weekday: false })}</time>{author && ` · ${author}`}
+      </p>
+      <h1 class="title">{title}</h1>
+      {excerpt && <p class="lead">{excerpt}</p>}
+    </header>
+
+    {
+      cover && (
+        <div class="container cover">
+          <Image src={cover} alt="" widths={[800, 1400, 2000]} sizes="(min-width: 1320px) 1240px, 94vw" loading="eager" />
+        </div>
+      )
+    }
+
+    <div class="container body">
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding-top: clamp(24px, 5vw, 56px);
+    padding-bottom: clamp(32px, 5vw, 56px);
+  }
+
+  .back {
+    margin-bottom: 12px;
+    color: var(--text-muted);
+  }
+
+  .title {
+    max-width: 18ch;
+    font-size: clamp(2.5rem, 6.5vw, 5.25rem);
+    font-stretch: 72%;
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 0.95;
+  }
+
+  .cover :global(img) {
+    width: 100%;
+    max-height: 78vh;
+    object-fit: cover;
+    border-radius: var(--radius);
+  }
+
+  .body {
+    display: flex;
+    justify-content: center;
+    padding-top: clamp(40px, 6vw, 72px);
+  }
+
+  .body .prose {
+    width: 100%;
+    font-size: 1.125rem;
+  }
+</style>

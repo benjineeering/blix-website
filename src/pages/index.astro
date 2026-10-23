@@ -1,0 +1,321 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import FilmStrip from '../components/FilmStrip.astro';
+import EventCard from '../components/EventCard.astro';
+import PostCard from '../components/PostCard.astro';
+import OpenStatus from '../components/OpenStatus.astro';
+import Icon from '../components/Icon.astro';
+import site from '../data/site.json';
+import { mdInline } from '../lib/markdown';
+import { sortEvents } from '../lib/time';
+import { url } from '../lib/url';
+
+const home = (await getEntry('home', 'index'))!.data;
+const services = (await getCollection('pages')).sort((a, b) => a.data.order - b.data.order);
+const lab = services.find((s) => s.id === 'lab');
+const { upcoming, past } = sortEvents(await getCollection('events', (e) => !e.data.draft));
+const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) => b.data.date.localeCompare(a.data.date)).slice(0, 2);
+---
+
+<Base>
+  <section class="hero container">
+    <div class="hero-text">
+      <OpenStatus class="status" />
+      <h1 class="display" set:html={mdInline(home.heading)} />
+      {home.text && <p class="lead">{home.text}</p>}
+      <div class="btn-row">
+        <a class="btn btn--primary" href={url('/lab/')}>Lab prices <Icon name="arrow" /></a>
+        <a class="btn" href={site.booking_url} target="_blank" rel="noopener">Book studio or space <Icon name="external" /></a>
+      </div>
+    </div>
+
+    {
+      home.hero_image && (
+        <figure class="hero-frame">
+          <div class="frame-edge top mono" aria-hidden="true">
+            <span>BLIX</span><span>◂ 24</span><span>24A ▸</span>
+          </div>
+          <Image src={home.hero_image} alt={home.hero_caption ?? ''} widths={[480, 760, 1100]} sizes="(min-width: 1000px) 460px, 90vw" loading="eager" fetchpriority="high" />
+          <figcaption class="frame-edge bottom mono">
+            <span class="yellow">▸ 25</span>
+            {home.hero_caption && <span>{home.hero_caption}</span>}
+          </figcaption>
+        </figure>
+      )
+    }
+  </section>
+
+  {
+    lab && lab.data.gallery.length > 0 && (
+      <section class="strip-section" aria-labelledby="strip-heading">
+        <div class="container section-head">
+          <div>
+            <p class="label">Sample scans</p>
+            <h2 class="h2" id="strip-heading">{home.strip_heading ?? 'Sample scans'}</h2>
+          </div>
+          <a class="link-arrow" href={url('/lab/')}>Development & scanning <Icon name="arrow" /></a>
+        </div>
+        <FilmStrip items={lab.data.gallery} />
+      </section>
+    )
+  }
+
+  <section class="section container" aria-labelledby="services-heading">
+    <div class="section-head">
+      <div>
+        <p class="label">What we do</p>
+        <h2 class="h2" id="services-heading">Lab · Studio · Space</h2>
+      </div>
+    </div>
+    <div class="services">
+      {
+        services.map((service) => (
+          <a class="service" href={url(`/${service.id}/`)}>
+            <span class="num mono">{String(service.data.order).padStart(2, '0')}</span>
+            <h3 class="service-title">{service.data.nav_label}</h3>
+            <p class="muted">{service.data.summary}</p>
+            <span class="service-foot">
+              {service.data.from_price && <span class="price mono">{service.data.from_price}</span>}
+              <Icon name="arrow" class="go" />
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section container" aria-labelledby="events-heading">
+    <div class="section-head">
+      <div>
+        <p class="label">Workshops · Photo walks · Exhibitions</p>
+        <h2 class="h2" id="events-heading">{upcoming.length ? 'Coming up' : 'Events'}</h2>
+      </div>
+      <a class="link-arrow" href={url('/events/')}>All events <Icon name="arrow" /></a>
+    </div>
+
+    {
+      upcoming.length > 0 ? (
+        <div class="event-grid">
+          {upcoming.slice(0, 3).map((event) => <EventCard event={event} />)}
+        </div>
+      ) : (
+        <>
+          <div class="empty">
+            <p class="h3">Nothing scheduled right now — new dates are coming soon.</p>
+            <p class="muted">
+              Follow us on <a href={site.instagram_url} target="_blank" rel="noopener">Instagram</a>, sign up for the{' '}
+              <a href={site.newsletter_url} target="_blank" rel="noopener">newsletter</a> or{' '}
+              <a href={url('/events.ics')}>subscribe to the calendar</a> to hear first.
+            </p>
+          </div>
+          <p class="label label--muted recent-label">Recently</p>
+          <div class="event-grid event-grid--compact">
+            {past.slice(0, 4).map((event) => <EventCard event={event} compact />)}
+          </div>
+        </>
+      )
+    }
+  </section>
+
+  {
+    posts.length > 0 && (
+      <section class="section container" aria-labelledby="blog-heading">
+        <div class="section-head">
+          <div>
+            <p class="label">Notes from the lab</p>
+            <h2 class="h2" id="blog-heading">Blog</h2>
+          </div>
+          <a class="link-arrow" href={url('/blog/')}>All posts <Icon name="arrow" /></a>
+        </div>
+        <div class="posts">
+          {posts.map((post) => <PostCard post={post} />)}
+        </div>
+      </section>
+    )
+  }
+</Base>
+
+<style>
+  /* ---------------------------------------------------------------- hero */
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+    align-items: center;
+    gap: clamp(40px, 6vw, 96px);
+    padding-top: clamp(32px, 7vw, 96px);
+    padding-bottom: clamp(56px, 9vw, 120px);
+  }
+
+  .hero-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+  }
+
+  .hero .display {
+    font-size: clamp(3.25rem, 8.4vw, 8rem);
+  }
+
+  /* *words* in the heading are highlighted */
+  .hero .display :global(em) {
+    font-style: normal;
+    color: var(--yellow);
+  }
+
+  .hero-frame {
+    margin: 0;
+    padding: 14px 14px 0;
+    background: #050504;
+    border: 1px solid var(--line);
+    transform: rotate(1.5deg);
+    box-shadow: 0 40px 80px -40px rgb(0 0 0 / 0.8);
+  }
+
+  .hero-frame :global(img) {
+    width: 100%;
+  }
+
+  .frame-edge {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 6px 2px;
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #c98a1a;
+  }
+
+  .frame-edge.top {
+    padding-top: 0;
+    padding-bottom: 10px;
+  }
+
+  .frame-edge.bottom {
+    justify-content: flex-start;
+    padding-block: 10px 12px;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 900px) {
+    .hero {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-frame {
+      max-width: 420px;
+      justify-self: center;
+      transform: rotate(1deg);
+    }
+  }
+
+  /* ---------------------------------------------------------------- strip */
+  .strip-section .section-head {
+    margin-bottom: 32px;
+  }
+
+  /* ---------------------------------------------------------------- services */
+  .services {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .service {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 320px;
+    padding: clamp(24px, 3vw, 36px);
+    background: var(--bg);
+    text-decoration: none;
+    transition: background 0.2s var(--ease);
+  }
+
+  .service:hover {
+    background: var(--bg-raised);
+    color: var(--text);
+  }
+
+  .num {
+    font-size: 0.8125rem;
+    color: var(--yellow);
+  }
+
+  .service-title {
+    font-size: clamp(2.75rem, 5vw, 4rem);
+    font-stretch: 72%;
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 0.9;
+    transition: color 0.2s var(--ease);
+  }
+
+  .service:hover .service-title {
+    color: var(--yellow);
+  }
+
+  .service-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  .price {
+    font-size: 0.875rem;
+    color: var(--text);
+  }
+
+  .service :global(.go) {
+    width: 24px;
+    height: 24px;
+    margin-left: auto;
+    color: var(--yellow);
+    transition: transform 0.2s var(--ease);
+  }
+
+  .service:hover :global(.go) {
+    transform: translateX(4px);
+  }
+
+  /* ---------------------------------------------------------------- events */
+  .event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: clamp(16px, 2.5vw, 28px);
+  }
+
+  .event-grid--compact {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  }
+
+  .empty {
+    display: grid;
+    gap: 10px;
+    padding: clamp(24px, 4vw, 40px);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius);
+  }
+
+  .recent-label {
+    margin: 40px 0 20px;
+  }
+
+  /* ---------------------------------------------------------------- blog */
+  .posts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    gap: clamp(40px, 6vw, 64px) clamp(24px, 4vw, 48px);
+  }
+</style>

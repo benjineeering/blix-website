@@ -1,0 +1,87 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import { url } from '../lib/url';
+import { formatDate } from '../lib/time';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+const { post } = Astro.props;
+const { title, date, author, excerpt, cover } = post.data;
+const href = url(`/blog/${post.id}/`);
+---
+
+<article class="post-card">
+  {
+    cover && (
+      <a class="cover" href={href} tabindex="-1" aria-hidden="true">
+        <Image src={cover} alt="" widths={[480, 800, 1200]} sizes="(min-width: 1000px) 600px, 92vw" loading="lazy" />
+      </a>
+    )
+  }
+  <div class="body">
+    <p class="label label--muted">
+      <time datetime={date}>{formatDate(date, { weekday: false })}</time>{author && ` · ${author}`}
+    </p>
+    <h3 class="title"><a href={href}>{title}</a></h3>
+    {excerpt && <p class="muted">{excerpt}</p>}
+    <span class="link-arrow yellow" aria-hidden="true">Read <Icon name="arrow" /></span>
+  </div>
+</article>
+
+<style>
+  .post-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .cover {
+    display: block;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    background: var(--bg-raised);
+    border-radius: var(--radius);
+  }
+
+  .cover :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s var(--ease);
+  }
+
+  .post-card:hover .cover :global(img) {
+    transform: scale(1.03);
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .title {
+    font-size: clamp(1.5rem, 2.6vw, 2rem);
+    font-stretch: 80%;
+    font-weight: 800;
+    line-height: 1.05;
+  }
+
+  .title a {
+    text-decoration: none;
+  }
+
+  .title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .post-card:hover .title a {
+    color: var(--yellow);
+  }
+</style>

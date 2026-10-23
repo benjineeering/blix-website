@@ -1,0 +1,206 @@
+---
+import { getCollection } from 'astro:content';
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import OpenStatus from './OpenStatus.astro';
+import site from '../data/site.json';
+import { url } from '../lib/url';
+import { openingHours } from '../lib/time';
+
+const legal = (await getCollection('legal')).sort((a, b) => a.data.order - b.data.order);
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="grid">
+      <div class="col brand-col">
+        <a href={url('/')} class="logo-link" aria-label="blix — home"><Logo class="logo" /></a>
+        <p class="tagline muted">{site.tagline}</p>
+      </div>
+
+      <div class="col">
+        <h2 class="label">Visit</h2>
+        <address>
+          <a href={site.map_url} target="_blank" rel="noopener">
+            {site.name}<br />
+            {site.address.street}<br />
+            {site.address.postcode} {site.address.city}
+          </a>
+        </address>
+      </div>
+
+      <div class="col">
+        <h2 class="label">Hours</h2>
+        <dl class="hours">
+          {
+            openingHours.map((h) => (
+              <div>
+                <dt>{h.label}</dt>
+                <dd class="mono">{h.time}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        {site.hours_note && <p class="note muted">{site.hours_note}</p>}
+        <OpenStatus class="status" />
+      </div>
+
+      <div class="col">
+        <h2 class="label">Follow</h2>
+        <ul class="links">
+          <li><a href={`mailto:${site.email}`}><Icon name="mail" />{site.email}</a></li>
+          <li><a href={site.instagram_url} target="_blank" rel="noopener"><Icon name="instagram" />Instagram</a></li>
+          <li><a href={site.newsletter_url} target="_blank" rel="noopener"><Icon name="arrow" />Newsletter</a></li>
+          <li><a href={url('/events.ics')}><Icon name="calendar" />Events calendar</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <p class="label label--muted">© {year} blix GbR · Munich</p>
+      <ul class="legal">
+        <li><a href={url('/contact/')}>Contact</a></li>
+        {legal.map((page) => <li><a href={url(`/${page.id}/`)}>{page.data.nav_label}</a></li>)}
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--section);
+    padding-block: clamp(56px, 8vw, 96px) 32px;
+    border-top: 1px solid var(--line);
+    background: var(--bg-sunken);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 40px;
+  }
+
+  .logo-link {
+    display: inline-block;
+    color: var(--yellow);
+  }
+
+  .logo-link :global(.logo) {
+    width: 128px;
+    height: auto;
+  }
+
+  .tagline {
+    margin-top: 20px;
+    max-width: 18em;
+  }
+
+  .col h2 {
+    margin-bottom: 16px;
+  }
+
+  address {
+    font-style: normal;
+  }
+
+  address a {
+    text-decoration: none;
+  }
+
+  .hours {
+    margin: 0;
+  }
+
+  .hours div + div {
+    margin-top: 6px;
+  }
+
+  .hours dt {
+    color: var(--text);
+  }
+
+  .hours dd {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .note {
+    margin-top: 12px;
+    font-size: 0.875rem;
+  }
+
+  .col :global(.status) {
+    margin-top: 16px;
+  }
+
+  .links,
+  .legal {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .links li + li {
+    margin-top: 8px;
+  }
+
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    word-break: break-word;
+  }
+
+  .links :global(svg) {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    color: var(--text-faint);
+  }
+
+  .bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px 32px;
+    margin-top: clamp(48px, 7vw, 80px);
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+
+  .legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    font-size: 0.875rem;
+  }
+
+  .legal a {
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+
+  .legal a:hover {
+    color: var(--yellow);
+  }
+
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .brand-col {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,23 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# logs & env
+npm-debug.log*
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Sveltia CMS temp files when working with a local repository
+.sveltia-tmp-*
+
+# original logo source files and shop signage (kept local, not published)
+01_logo/

@@ -1,0 +1,249 @@
+---
+// Renders every entry of the "pages" collection (Lab, Studio, Space, …)
+// and the "legal" collection (Impressum, AGB, Datenschutz) at /<id>/.
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Gallery from '../components/Gallery.astro';
+import Icon from '../components/Icon.astro';
+import site from '../data/site.json';
+import { md } from '../lib/markdown';
+import { url } from '../lib/url';
+
+type Props =
+  | { kind: 'page'; entry: CollectionEntry<'pages'> }
+  | { kind: 'legal'; entry: CollectionEntry<'legal'> };
+
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  const legal = await getCollection('legal');
+  return [
+    ...pages.map((entry) => ({ params: { page: entry.id }, props: { kind: 'page' as const, entry } })),
+    ...legal.map((entry) => ({ params: { page: entry.id }, props: { kind: 'legal' as const, entry } })),
+  ];
+}
+
+const { kind, entry } = Astro.props;
+const { Content } = await render(entry);
+const page = kind === 'page' ? entry.data : undefined;
+const hasBody = Boolean(entry.body?.trim());
+---
+
+{
+  kind === 'legal' ? (
+    <Base title={entry.data.title} noindex={false}>
+      <PageHeader title={entry.data.title} />
+      <div class="container">
+        <div class="prose legal" lang="de">
+          <Content />
+        </div>
+      </div>
+    </Base>
+  ) : (
+    page && (
+      <Base title={page.title} description={page.summary}>
+        <PageHeader label={`${String(page.order).padStart(2, '0')} — ${page.nav_label}`} title={page.title} intro={page.intro}>
+          {page.cta_url && (
+            <div class="btn-row">
+              <a class="btn btn--primary" href={page.cta_url} target="_blank" rel="noopener">
+                {page.cta_label ?? 'Book online'} <Icon name="arrow" />
+              </a>
+              <a class="btn" href={`mailto:${site.email}`}>
+                Ask a question
+              </a>
+            </div>
+          )}
+        </PageHeader>
+
+        {page.facts.length > 0 && (
+          <div class="container">
+            <dl class="facts">
+              {page.facts.map((fact) => (
+                <div class="fact">
+                  <dt class="label label--muted">{fact.label}</dt>
+                  <dd>{fact.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
+
+        {page.sections.length > 0 && (
+          <section class="container sections" data-count={page.sections.length}>
+            {page.sections.map((section) => (
+              <div class="price-card">
+                <h2 class="h2">{section.heading}</h2>
+                {section.text && <div class="text muted" set:html={md(section.text)} />}
+                {section.prices.length > 0 && (
+                  <dl class="prices">
+                    {section.prices.map((row) => (
+                      <div class="row">
+                        <dt>{row.item}</dt>
+                        <dd class="mono">{row.price}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+                {section.note && <div class="note" set:html={md(section.note)} />}
+              </div>
+            ))}
+          </section>
+        )}
+
+        {page.gallery.length > 0 && (
+          <section class="section">
+            <div class="container">
+              <div class="section-head">
+                <h2 class="h2">{page.gallery_heading ?? 'Gallery'}</h2>
+              </div>
+              <Gallery items={page.gallery} label={page.gallery_heading} variant={entry.id === 'lab' ? 'scans' : 'photos'} />
+            </div>
+          </section>
+        )}
+
+        {hasBody && (
+          <section class="container fine-print">
+            <div class="prose">
+              <Content />
+            </div>
+          </section>
+        )}
+
+        {page.cta_url && (
+          <section class="container">
+            <div class="cta-band">
+              <p class="h2">Ready to book?</p>
+              <div class="btn-row">
+                <a class="btn btn--primary" href={page.cta_url} target="_blank" rel="noopener">
+                  {page.cta_label ?? 'Book online'} <Icon name="arrow" />
+                </a>
+                <a class="btn" href={url('/contact/')}>
+                  Contact us
+                </a>
+              </div>
+            </div>
+          </section>
+        )}
+      </Base>
+    )
+  )
+}
+
+<style>
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 1px;
+    margin: 0 0 clamp(40px, 6vw, 72px);
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .fact {
+    padding: 22px 24px;
+    background: var(--bg);
+  }
+
+  .fact dd {
+    margin: 8px 0 0;
+    font-size: clamp(1.5rem, 2.6vw, 2rem);
+    font-stretch: 75%;
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .sections {
+    display: grid;
+    gap: clamp(20px, 3vw, 32px);
+  }
+
+  .sections[data-count='2'] {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  }
+
+  .price-card {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: clamp(24px, 4vw, 40px);
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .sections[data-count='1'] .price-card {
+    max-width: 760px;
+  }
+
+  .text :global(p + p) {
+    margin-top: 1em;
+  }
+
+  .prices {
+    margin: 0;
+  }
+
+  .row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .row:first-child {
+    border-top: 1px solid var(--line);
+  }
+
+  .row dt {
+    flex: 1;
+  }
+
+  .row dd {
+    margin: 0;
+    color: var(--yellow);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .note {
+    margin-top: auto;
+    padding-left: 14px;
+    border-left: 2px solid var(--yellow);
+    font-size: 0.9375rem;
+    color: var(--text-muted);
+  }
+
+  .note :global(a) {
+    color: var(--text);
+  }
+
+  .fine-print {
+    padding-top: clamp(48px, 7vw, 80px);
+  }
+
+  .fine-print .prose {
+    font-size: 0.9375rem;
+  }
+
+  .cta-band {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-top: clamp(48px, 7vw, 80px);
+    padding: clamp(28px, 5vw, 48px);
+    border: 1px solid var(--yellow);
+    border-radius: var(--radius);
+    background: var(--yellow-wash);
+  }
+
+  .legal {
+    font-size: 0.9375rem;
+  }
+</style>

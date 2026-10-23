@@ -1,0 +1,187 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import { url } from '../lib/url';
+import { dateParts, timeRange, isUpcoming } from '../lib/time';
+
+interface Props {
+  event: CollectionEntry<'events'>;
+  compact?: boolean;
+}
+const { event, compact = false } = Astro.props;
+const { title, date, summary, poster, location, ticket_url } = event.data;
+const parts = dateParts(date);
+const time = timeRange(event);
+const upcoming = isUpcoming(event);
+const href = url(`/events/${event.id}/`);
+---
+
+<article class:list={['event-card', { compact, past: !upcoming }]}>
+  <a class="poster" href={href} tabindex="-1" aria-hidden="true">
+    {
+      poster ? (
+        <Image src={poster} alt="" widths={[360, 560, 800]} sizes="(min-width: 1000px) 360px, (min-width: 640px) 45vw, 92vw" loading="lazy" />
+      ) : (
+        <span class="poster-fallback">blix</span>
+      )
+    }
+  </a>
+  <div class="body">
+    <p class="date mono">
+      <span class="day">{parts.day}</span>
+      <span class="rest">{parts.weekday} · {parts.month} {parts.year}{time && <><br />{time}</>}</span>
+    </p>
+    <h3 class="h3"><a href={href}>{title}</a></h3>
+    {!compact && summary && <p class="summary muted">{summary}</p>}
+    {!compact && location && <p class="meta"><Icon name="pin" />{location}</p>}
+    {
+      !compact && upcoming && ticket_url && (
+        <a class="ticket link-arrow" href={ticket_url} target="_blank" rel="noopener">
+          <Icon name="ticket" /> Tickets
+        </a>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .event-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.2s var(--ease), transform 0.2s var(--ease);
+  }
+
+  .event-card:hover {
+    border-color: var(--yellow);
+  }
+
+  .poster {
+    display: block;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: var(--bg-sunken);
+  }
+
+  .poster :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s var(--ease);
+  }
+
+  .event-card:hover .poster :global(img) {
+    transform: scale(1.03);
+  }
+
+  .past .poster :global(img) {
+    filter: grayscale(0.85) brightness(0.8);
+    transition: transform 0.6s var(--ease), filter 0.3s var(--ease);
+  }
+
+  .past:hover .poster :global(img) {
+    filter: none;
+  }
+
+  .poster-fallback {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--yellow);
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    flex: 1;
+  }
+
+  .date {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    color: var(--yellow);
+  }
+
+  .day {
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .rest {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .past .date {
+    color: var(--text-muted);
+  }
+
+  .h3 a {
+    text-decoration: none;
+  }
+
+  /* make the whole card clickable */
+  .h3 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .summary {
+    font-size: 0.9375rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .meta :global(svg) {
+    width: 16px;
+    height: 16px;
+    color: var(--text-faint);
+    flex: none;
+  }
+
+  .ticket {
+    position: relative;
+    z-index: 1;
+    margin-top: auto;
+    padding-top: 4px;
+    color: var(--yellow);
+  }
+
+  .compact .body {
+    padding: 16px;
+  }
+
+  .compact .day {
+    font-size: 1.75rem;
+  }
+
+  .compact .h3 {
+    font-size: 1.0625rem;
+  }
+</style>
