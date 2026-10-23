@@ -18,7 +18,7 @@ const withBase = (redirects) =>
 export default defineConfig({
   site,
   base,
-  integrations: [sitemap({ filter: (page) => !page.includes('/admin/') })],
+  integrations: [sitemap({ filter: (page) => !page.includes('/admin/') && !page.includes('/contact/thanks') })],
   image: {
     layout: 'constrained',
     breakpoints: [480, 800, 1200, 1600, 2000],

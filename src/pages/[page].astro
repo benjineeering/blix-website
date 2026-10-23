@@ -6,7 +6,6 @@ import Base from '../layouts/Base.astro';
 import PageHeader from '../components/PageHeader.astro';
 import Gallery from '../components/Gallery.astro';
 import Icon from '../components/Icon.astro';
-import site from '../data/site.json';
 import { md } from '../lib/markdown';
 import { url } from '../lib/url';
 
@@ -48,7 +47,7 @@ const hasBody = Boolean(entry.body?.trim());
               <a class="btn btn--primary" href={page.cta_url} target="_blank" rel="noopener">
                 {page.cta_label ?? 'Book online'} <Icon name="arrow" />
               </a>
-              <a class="btn" href={`mailto:${site.email}`}>
+              <a class="btn" href={`${url('/contact/')}?topic=${entry.id}#message`}>
                 Ask a question
               </a>
             </div>
@@ -117,7 +116,7 @@ const hasBody = Boolean(entry.body?.trim());
                 <a class="btn btn--primary" href={page.cta_url} target="_blank" rel="noopener">
                   {page.cta_label ?? 'Book online'} <Icon name="arrow" />
                 </a>
-                <a class="btn" href={url('/contact/')}>
+                <a class="btn" href={`${url('/contact/')}?topic=${entry.id}#message`}>
                   Contact us
                 </a>
               </div>

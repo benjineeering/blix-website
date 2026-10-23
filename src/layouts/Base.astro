@@ -28,7 +28,6 @@ const jsonLd = {
   url: absoluteUrl('/', Astro.site),
   logo: absoluteUrl('/apple-touch-icon.png', Astro.site),
   image: absoluteUrl('/og-default.jpg', Astro.site),
-  email: site.email,
   ...(site.phone ? { telephone: site.phone } : {}),
   address: {
     '@type': 'PostalAddress',
@@ -76,5 +75,15 @@ const jsonLd = {
       <slot />
     </main>
     <Footer />
+
+    <script>
+      // Turn bot-protected email links (see src/lib/protect-email.mjs) back into real ones.
+      document.querySelectorAll<HTMLAnchorElement>('a[data-mail]').forEach((link) => {
+        const address = [...atob(link.dataset.mail ?? '')].reverse().join('');
+        const label = address.replace('@', ' [at] ');
+        link.href = `mailto:${address}`;
+        if (link.textContent?.includes(label)) link.textContent = link.textContent.replace(label, address);
+      });
+    </script>
   </body>
 </html>

@@ -1,5 +1,6 @@
 import { Marked } from 'marked';
 import { url, isExternal } from './url';
+import { protectedLinkAttributes, obfuscatedLabel } from './protect-email.mjs';
 
 // Renders short Markdown snippets that live in front matter fields
 // (section texts, notes), with the same link handling as page bodies.
@@ -9,6 +10,10 @@ const marked = new Marked({
   renderer: {
     link({ href, title, tokens }) {
       const text = this.parser.parseInline(tokens);
+      if (/^mailto:/i.test(href)) {
+        const { 'data-mail': encoded, address } = protectedLinkAttributes(href);
+        return `<a href="#" data-mail="${encoded}">${text.split(address).join(obfuscatedLabel(address))}</a>`;
+      }
       const external = isExternal(href);
       const attrs = [
         `href="${external ? href : url(href)}"`,

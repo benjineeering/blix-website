@@ -13,7 +13,7 @@ Built with [Astro](https://astro.build), hosted on GitHub Pages, edited with [Sv
 
 | What you want to change | Where in the editor |
 | --- | --- |
-| Opening hours, address, email, Instagram/newsletter/store/booking links | **Site settings** |
+| Opening hours, address, Instagram/newsletter/store/booking links, contact form key | **Site settings** |
 | Home page headline, intro and photo | **Home page** |
 | Lab, Studio or Space prices, texts, photos | **Lab, Studio & Space** |
 | Add a workshop / photo walk / party | **Events → New Event** |
@@ -56,7 +56,9 @@ You can also edit any file directly on GitHub (pencil icon) — the content live
 
 **Nicer editor login (optional).** Instead of access tokens, editors can use a normal “Sign in with GitHub” button by deploying the free [Sveltia CMS Authenticator](https://github.com/sveltia/sveltia-cms-auth) on Cloudflare Workers and adding its URL as `base_url` under `backend` in `config.yml`.
 
-**Contact form (optional).** GitHub Pages can't send email itself. Create a form at a service such as Formspree or Web3Forms and paste its endpoint into *Site settings → Contact form address*; the form then appears on the contact page.
+**Contact form.** GitHub Pages can't send email itself, so the form is delivered by [Web3Forms](https://web3forms.com) (free up to 250 messages a month). Create an access key on their site for the address that should receive the messages, then paste it into *Site settings → Contact form key*. Without a key the contact page shows an Instagram fallback instead of the form. Spam protection: a hidden honeypot field, a minimum fill-in time, and Web3Forms' own filtering. If spam still gets through, Web3Forms' free hCaptcha can be added to the form.
+
+**Email address.** The blix email is deliberately not shown on the site to avoid spam. It only appears where the law requires it (Impressum, Datenschutz), and there it is encoded so bots can't read it from the page source (any email link written in Markdown is protected the same way; see `src/lib/protect-email.mjs`).
 
 ---
 

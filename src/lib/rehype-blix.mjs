@@ -5,7 +5,17 @@
  * - turns a paragraph that only contains images into a row of <figure>s,
  *   using each image's title ("caption") as the caption. Two images on
  *   consecutive lines therefore show side by side.
+ * - hides email addresses from bots (see protect-email.mjs)
  */
+import { protectedLinkAttributes, obfuscatedLabel } from './protect-email.mjs';
+
+function replaceText(node, search, replacement) {
+  for (const child of node.children ?? []) {
+    if (child.type === 'text') child.value = child.value.split(search).join(replacement);
+    else replaceText(child, search, replacement);
+  }
+}
+
 export default function rehypeBlix({ base = '/' } = {}) {
   const prefix = base.replace(/\/$/, '');
 
@@ -35,7 +45,12 @@ export default function rehypeBlix({ base = '/' } = {}) {
 
       if (child.tagName === 'a' && child.properties?.href) {
         const href = String(child.properties.href);
-        if (/^https?:\/\//.test(href)) {
+        if (/^mailto:/i.test(href)) {
+          const { href: placeholder, 'data-mail': encoded, address } = protectedLinkAttributes(href);
+          child.properties.href = placeholder;
+          child.properties.dataMail = encoded;
+          replaceText(child, address, obfuscatedLabel(address));
+        } else if (/^https?:\/\//.test(href)) {
           child.properties.target = '_blank';
           child.properties.rel = ['noopener', 'noreferrer'];
         } else {

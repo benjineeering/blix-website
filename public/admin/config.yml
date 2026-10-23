@@ -41,8 +41,7 @@ singletons:
       - { name: name, label: Business name, widget: string }
       - { name: tagline, label: Tagline, widget: string, hint: 'Shown in the footer and browser tab.' }
       - { name: description, label: Search engine description, widget: text, hint: 'One or two sentences shown by Google and when links are shared.' }
-      - { name: email, label: Email, widget: string }
-      - { name: phone, label: Phone, widget: string, required: false }
+      - { name: phone, label: Phone, widget: string, required: false, hint: 'Shown on the contact page if filled in.' }
       - name: address
         label: Address
         widget: object
@@ -79,11 +78,11 @@ singletons:
       - { name: store_url, label: Online store link, widget: string }
       - { name: booking_url, label: Booking link (studio & space), widget: string }
       - { name: contact_intro, label: Contact page intro, widget: text }
-      - name: contact_form_endpoint
-        label: Contact form address
+      - name: contact_form_key
+        label: Contact form key (Web3Forms)
         widget: string
         required: false
-        hint: 'Leave empty to hide the contact form. To enable it, paste the form endpoint from a form service such as Formspree or Web3Forms.'
+        hint: 'The access key from web3forms.com. Messages from the contact form are emailed to the address the key was created for. Leave empty to switch the form off.'
 
   - name: home
     label: Home page

@@ -49,7 +49,7 @@ const year = new Date().getFullYear();
       <div class="col">
         <h2 class="label">Follow</h2>
         <ul class="links">
-          <li><a href={`mailto:${site.email}`}><Icon name="mail" />{site.email}</a></li>
+          <li><a href={url('/contact/')}><Icon name="mail" />Contact form</a></li>
           <li><a href={site.instagram_url} target="_blank" rel="noopener"><Icon name="instagram" />Instagram</a></li>
           <li><a href={site.newsletter_url} target="_blank" rel="noopener"><Icon name="arrow" />Newsletter</a></li>
           <li><a href={url('/events.ics')}><Icon name="calendar" />Events calendar</a></li>

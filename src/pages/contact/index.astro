@@ -1,0 +1,357 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import OpenStatus from '../../components/OpenStatus.astro';
+import Icon from '../../components/Icon.astro';
+import site from '../../data/site.json';
+import { openingHours } from '../../lib/time';
+import { url } from '../../lib/url';
+
+// Topics for the form; ?topic=<value> in the URL preselects one (e.g. from the Studio page).
+const pages = (await getCollection('pages')).sort((a, b) => a.data.order - b.data.order);
+const topics = [
+  { value: 'general', label: 'General question' },
+  ...pages.map((p) => ({ value: p.id, label: p.data.nav_label })),
+  { value: 'events', label: 'Events & workshops' },
+];
+
+const formKey = site.contact_form_key;
+const thanksUrl = new URL(url('/contact/thanks/'), Astro.site).toString();
+---
+
+<Base title="Contact" description={site.contact_intro}>
+  <PageHeader label="Say hello" title="Contact" intro={site.contact_intro} />
+
+  <div class="container layout">
+    <section class="form-card" id="message" aria-labelledby="form-heading">
+      <h2 class="label" id="form-heading">Send us a message</h2>
+
+      {
+        formKey ? (
+          <form class="form" action="https://api.web3forms.com/submit" method="POST" data-contact-form>
+            <input type="hidden" name="access_key" value={formKey} />
+            <input type="hidden" name="subject" value="New message from the blix website" />
+            <input type="hidden" name="from_name" value="blix website" />
+            <input type="hidden" name="redirect" value={thanksUrl} />
+            {/* Spam trap: invisible to people, bots tend to tick it. */}
+            <input type="checkbox" name="botcheck" class="trap" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+            <label>
+              <span>Name *</span>
+              <input name="name" autocomplete="name" required maxlength="120" />
+            </label>
+            <label>
+              <span>Email *</span>
+              <input name="email" type="email" autocomplete="email" required maxlength="200" />
+            </label>
+            <label>
+              <span>Phone</span>
+              <input name="phone" type="tel" autocomplete="tel" maxlength="40" />
+            </label>
+            <label>
+              <span>Topic</span>
+              <select name="topic">
+                {topics.map((t) => <option value={t.label} data-topic={t.value}>{t.label}</option>)}
+              </select>
+            </label>
+            <label class="full">
+              <span>Message *</span>
+              <textarea name="message" rows="7" required maxlength="5000" />
+            </label>
+            <p class="full privacy muted">
+              We use your details only to answer your message. The form is delivered by Web3Forms. See our{' '}
+              <a href={url('/datenschutz/')}>privacy policy</a>.
+            </p>
+            <div class="full submit-row">
+              <button class="btn btn--primary" type="submit" data-submit>
+                Send message <Icon name="arrow" />
+              </button>
+              <p class="status" role="status" aria-live="polite" data-status></p>
+            </div>
+          </form>
+        ) : (
+          <div class="form-off">
+            <p class="h3">The contact form is being set up.</p>
+            <p class="muted">
+              Until then, send us a message on <a href={site.instagram_url} target="_blank" rel="noopener">Instagram</a> or come by
+              during opening hours.
+            </p>
+          </div>
+        )
+      }
+
+      <div class="sent" hidden data-sent>
+        <p class="h3">Thanks — your message is on its way!</p>
+        <p class="muted">We usually reply within a few days. For anything urgent, come by during opening hours.</p>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="card">
+        <h2 class="label">Visit</h2>
+        <address>
+          {site.name}<br />
+          {site.address.street}<br />
+          {site.address.postcode} {site.address.city}
+        </address>
+        <a class="link-arrow" href={site.map_url} target="_blank" rel="noopener">Open in maps <Icon name="external" /></a>
+      </section>
+
+      <section class="card">
+        <h2 class="label">Opening hours</h2>
+        <dl class="hours">
+          {
+            openingHours.map((h) => (
+              <div>
+                <dt>{h.longLabel}</dt>
+                <dd class="mono">{h.time}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        {site.hours_note && <p class="muted">{site.hours_note}</p>}
+        <OpenStatus />
+      </section>
+
+      <section class="card">
+        <h2 class="label">Stay in the loop</h2>
+        <ul class="links">
+          <li><a href={site.instagram_url} target="_blank" rel="noopener"><Icon name="instagram" /> Instagram</a></li>
+          <li><a href={site.newsletter_url} target="_blank" rel="noopener"><Icon name="mail" /> Newsletter</a></li>
+          <li><a href={url('/events.ics')}><Icon name="calendar" /> Events calendar</a></li>
+          {site.phone && <li><a href={`tel:${site.phone.replace(/\s/g, '')}`}><Icon name="arrow" /> {site.phone}</a></li>}
+        </ul>
+      </section>
+    </aside>
+  </div>
+</Base>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+
+  if (form) {
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const button = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    const sent = document.querySelector<HTMLElement>('[data-sent]')!;
+    const topic = form.querySelector<HTMLSelectElement>('select[name="topic"]')!;
+    const openedAt = Date.now();
+
+    // Preselect the topic from ?topic=studio etc.
+    const wanted = new URLSearchParams(location.search).get('topic');
+    const option = [...topic.options].find((o) => o.dataset.topic === wanted);
+    if (option) topic.value = option.value;
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
+
+      // Bots fill the trap or submit instantly — pretend it worked and drop it.
+      if (data.botcheck || Date.now() - openedAt < 3000) {
+        form.hidden = true;
+        sent.hidden = false;
+        return;
+      }
+
+      delete data.redirect;
+      delete data.botcheck;
+      data.subject = `blix website · ${data.topic} · ${data.name}`;
+
+      button.disabled = true;
+      status.textContent = 'Sending…';
+      status.classList.remove('error');
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.success) throw new Error(result.message || response.statusText);
+        form.hidden = true;
+        sent.hidden = false;
+        sent.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch {
+        status.textContent = 'Sorry, that didn’t work. Please try again in a moment, or message us on Instagram.';
+        status.classList.add('error');
+        button.disabled = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+    gap: clamp(16px, 2.5vw, 28px);
+    align-items: start;
+  }
+
+  .form-card {
+    padding: clamp(24px, 4vw, 44px);
+    border: 1px solid var(--yellow);
+    border-radius: var(--radius);
+    background: var(--yellow-wash);
+    scroll-margin-top: calc(var(--header-h) + 16px);
+  }
+
+  .form-card > .label {
+    margin-bottom: 24px;
+  }
+
+  .form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .form label {
+    display: grid;
+    gap: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .form .full {
+    grid-column: 1 / -1;
+  }
+
+  .form input,
+  .form select,
+  .form textarea {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 16px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 1rem;
+  }
+
+  .form textarea {
+    resize: vertical;
+    min-height: 160px;
+  }
+
+  .form input:focus,
+  .form select:focus,
+  .form textarea:focus {
+    outline: none;
+    border-color: var(--yellow);
+    box-shadow: 0 0 0 3px rgb(254 199 0 / 0.2);
+  }
+
+  .form .trap {
+    display: none;
+  }
+
+  .privacy {
+    font-size: 0.8125rem;
+  }
+
+  .submit-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .submit-row button[disabled] {
+    opacity: 0.6;
+    cursor: progress;
+  }
+
+  .status {
+    font-size: 0.9375rem;
+    color: var(--text-muted);
+  }
+
+  .status.error {
+    color: var(--safelight);
+  }
+
+  .form-off,
+  .sent {
+    display: grid;
+    gap: 10px;
+  }
+
+  .sent[hidden] {
+    display: none;
+  }
+
+  .side {
+    display: grid;
+    gap: clamp(16px, 2.5vw, 28px);
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: clamp(24px, 3vw, 32px);
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  address {
+    font-style: normal;
+    font-size: 1.25rem;
+    line-height: 1.4;
+  }
+
+  .hours {
+    margin: 0;
+  }
+
+  .hours div + div {
+    margin-top: 8px;
+  }
+
+  .hours dd {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  .links {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .links li + li {
+    margin-top: 10px;
+  }
+
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .links :global(svg) {
+    width: 20px;
+    height: 20px;
+    color: var(--text-faint);
+  }
+
+  @media (max-width: 900px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .form {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
