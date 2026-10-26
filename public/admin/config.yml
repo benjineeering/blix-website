@@ -110,7 +110,6 @@ singletons:
       - { name: instagram_url, label: Instagram link, widget: string }
       - { name: newsletter_url, label: Newsletter sign-up link, widget: string }
       - { name: store_url, label: Online store link, widget: string }
-      - { name: booking_url, label: Booking link (studio & space), widget: string }
       - { name: contact_intro, label: Contact page intro, widget: text, i18n: true, required: [en] }
       - name: contact_form_key
         label: Contact form key (Web3Forms)
@@ -199,7 +198,7 @@ collections:
         hint: 'Tip: put two images directly below each other (no empty line in between) to show them side by side. An image “title” becomes its caption.'
 
   - name: pages
-    label: Lab, Studio & Space
+    label: Lab & Space
     label_singular: Page
     icon: storefront
     description: Prices, opening facts and galleries of the service pages.
@@ -217,7 +216,7 @@ collections:
           - { name: nav_label, label: Menu label, widget: string, i18n: true, required: [en] }
           - { name: order, label: Position in menu, widget: number, value_type: int, default: 9 }
           - { name: summary, label: Summary (home page card), widget: text, i18n: true, required: [en] }
-          - { name: from_price, label: Price teaser (home page card), widget: string, i18n: true, required: false, hint: 'e.g. “from 30 € / hr”' }
+          - { name: from_price, label: Price teaser (home page card), widget: string, i18n: true, required: false, hint: 'e.g. “from 8.99 €” or “On request”' }
           - { name: intro, label: Intro text, widget: text, i18n: true, required: false }
           - name: facts
             label: Key facts
@@ -231,12 +230,13 @@ collections:
               - { name: label, label: Label, widget: string, i18n: true, required: [en] }
               - { name: value, label: Value, widget: string, i18n: true, required: [en] }
           - name: sections
-            label: Price sections
+            label: Sections
             label_singular: Section
             widget: list
             i18n: duplicate
             required: false
             summary: '{{fields.heading}}'
+            hint: 'Cards with a heading, text and an optional price list.'
             fields:
               - { name: heading, label: Heading, widget: string, i18n: true, required: [en] }
               - { name: text, label: Text, widget: markdown, i18n: true, required: false, buttons: [bold, italic, link], editor_components: [] }
@@ -251,8 +251,8 @@ collections:
                   - { name: item, label: Item, widget: string, i18n: true, required: [en] }
                   - { name: price, label: Price, widget: string, i18n: true, required: [en], hint: 'Write it exactly as it should appear, e.g. “8.99 €” / “8,99 €”, “+ 1.99 €” or “on request”.' }
               - { name: note, label: Note, widget: markdown, i18n: true, required: false, buttons: [bold, italic, link], editor_components: [] }
-          - { name: cta_label, label: Booking button text, widget: string, i18n: true, required: false }
-          - { name: cta_url, label: Booking button link, widget: string, required: false, hint: 'Leave empty to hide the booking buttons.' }
+          - { name: cta_label, label: Button text, widget: string, i18n: true, required: false, hint: 'Without a booking link below, the button opens the contact form (e.g. “Send a request”). Leave both empty for no buttons.' }
+          - { name: cta_url, label: Booking button link, widget: string, required: false, hint: 'Only for online booking, e.g. a SumUp Bookings link. Leave empty for request-only pages.' }
           - { name: gallery_heading, label: Gallery heading, widget: string, i18n: true, required: false }
           - name: gallery
             label: Gallery
@@ -265,14 +265,8 @@ collections:
               - { name: image, label: Photo, widget: image }
               - { name: caption, label: Caption, widget: string, i18n: true, required: false }
           - { name: body, label: Fine print (e.g. cancellation terms), widget: markdown, i18n: true, required: false }
-      - name: studio
-        label: Studio
-        file: src/content/pages/studio/index.{{locale}}.md
-        i18n: true
-        preview_path: studio/
-        fields: *service_fields
       - name: space
-        label: Space
+        label: Space (studio, events & office)
         file: src/content/pages/space/index.{{locale}}.md
         i18n: true
         preview_path: space/

@@ -1,7 +1,7 @@
 {
   "name": "blix",
-  "tagline": "Film lab, studio & space in Munich",
-  "description": "blix is an analog film lab, photo studio and event space in Munich. C41 and B&W development, in-house scanning, studio and space rental, workshops and photo walks.",
+  "tagline": "Film lab & event space in Munich",
+  "description": "blix is an analog film lab and event space in Munich: C41 and B&W development, in-house scanning, workshops, photo walks and exhibitions. Our space is also available on request as a photo studio, event venue or office.",
   "phone": "",
   "address": {
     "street": "Pappenheimstr. 3",
@@ -36,7 +36,6 @@
   "instagram_url": "https://www.instagram.com/blix_munich/",
   "newsletter_url": "https://seu2.cleverreach.com/f/449876-427299/",
   "store_url": "https://blix.sumupstore.com/",
-  "booking_url": "https://www.sumupbookings.com/blix-gbr",
-  "contact_intro": "Questions about your film, a studio booking or an event? Drop us a line or come by during opening hours.",
+  "contact_intro": "Questions about your film, a workshop or hiring our space? Drop us a line or come by during opening hours.",
   "contact_form_key": "21c20c2a-708c-4fe1-a2f0-4662e1eadec9"
 }

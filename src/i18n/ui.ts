@@ -32,7 +32,7 @@ const en = {
   'notice.label': 'Notice',
 
   'home.labPrices': 'Lab prices',
-  'home.book': 'Book studio or space',
+  'home.space': 'Hire the space',
   'home.sampleScans': 'Sample scans',
   'home.devScanning': 'Development & scanning',
   'home.whatWeDo': 'What we do',
@@ -52,6 +52,7 @@ const en = {
   'service.ask': 'Ask a question',
   'service.book': 'Book online',
   'service.ready': 'Ready to book?',
+  'service.request': 'Tell us what you’re planning',
   'service.contact': 'Contact us',
   'service.gallery': 'Gallery',
 
@@ -154,7 +155,7 @@ const de: Record<Key, string> = {
   'notice.label': 'Hinweis',
 
   'home.labPrices': 'Laborpreise',
-  'home.book': 'Studio oder Space buchen',
+  'home.space': 'Space mieten',
   'home.sampleScans': 'Beispielscans',
   'home.devScanning': 'Entwicklung & Scans',
   'home.whatWeDo': 'Was wir machen',
@@ -174,6 +175,7 @@ const de: Record<Key, string> = {
   'service.ask': 'Frage stellen',
   'service.book': 'Online buchen',
   'service.ready': 'Lust zu buchen?',
+  'service.request': 'Erzähl uns, was du vorhast',
   'service.contact': 'Kontakt',
   'service.gallery': 'Galerie',
 

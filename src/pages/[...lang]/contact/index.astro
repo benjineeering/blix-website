@@ -18,7 +18,7 @@ const t = useTranslations(lang);
 const site = getSite(lang);
 const link = (path: string) => url(localizePath(path, lang));
 
-// Topics for the form; ?topic=<value> in the URL preselects one (e.g. from the Studio page).
+// Topics for the form; ?topic=<value> in the URL preselects one (e.g. from the Space page).
 const pages = (await getLocalized('pages', lang)).sort((a, b) => a.data.order - b.data.order);
 const topics = [
   { value: 'general', label: t('contact.topicGeneral') },
@@ -151,7 +151,7 @@ const instagramLink = `<a href="${site.instagram_url}" target="_blank" rel="noop
     const topic = form.querySelector<HTMLSelectElement>('select[name="topic"]')!;
     const openedAt = Date.now();
 
-    // Preselect the topic from ?topic=studio etc.
+    // Preselect the topic from ?topic=space etc.
     const wanted = new URLSearchParams(location.search).get('topic');
     const option = [...topic.options].find((o) => o.dataset.topic === wanted);
     if (option) topic.value = option.value;

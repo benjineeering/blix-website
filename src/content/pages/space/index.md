@@ -1,24 +1,18 @@
 ---
-title: Our Space
+title: Studio, event space & office
 nav_label: Space
-order: 3
-summary: A bright, flexible space for offsites, workshops, team events and pop-ups.
-from_price: 2 hours for 100 €
-intro: Bright, flexible meeting space in Munich – ideal for offsites, workshops & team events.
+order: 2
+summary: A small photo studio, a bright event venue or an office for the day — all in one space next to the lab.
+from_price: On request
+intro: Shoot, host or work in our space next to the lab. There's no online booking — just tell us what you're planning and we'll find a date that works.
 sections:
-  - heading: Rental
-    text: |-
-      Our versatile venue is perfect for company offsites in Munich, strategy sessions, workshops, creative meetings, small events, and pop-ups. The open layout can be easily adapted to your needs, with tables and chairs available, high-speed WiFi, and a simple, hassle-free setup.
-
-      Whether you're planning a team offsite in Munich, a brainstorming session, or a small corporate event, our space provides a productive and inspiring environment.
-    prices:
-      - item: 2 hours
-        price: 100 €
-      - item: Half / full day
-        price: on request
-    note: Book online via the button below. For custom requests or any questions, please message us directly.
-cta_label: Book the space
-cta_url: https://www.sumupbookings.com/blix-gbr
+  - heading: Photo studio
+    text: A small, flexible studio with backdrops and lighting gear — for portraits, products, fashion and content.
+  - heading: Event space
+    text: A bright, open room for workshops, exhibitions, pop-ups and small events. Tables and chairs are there, and the layout adapts to what you have in mind.
+  - heading: Office setup
+    text: Tables, chairs and fast WiFi for team offsites, strategy sessions, creative meetings or simply a focused day of work.
+cta_label: Send a request
 gallery_heading: The space
 gallery:
   - image: ./space-1.jpg

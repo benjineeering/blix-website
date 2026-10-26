@@ -1,6 +1,6 @@
 # blix website
 
-The website of **blix** — film lab, studio & space in Munich.
+The website of **blix** — film lab & event space in Munich.
 Built with [Astro](https://astro.build), hosted on GitHub Pages, edited with [Sveltia CMS](https://sveltiacms.app).
 
 ---
@@ -19,9 +19,9 @@ Built with [Astro](https://astro.build), hosted on GitHub Pages, edited with [Sv
 | --- | --- |
 | **Closed today / holiday / special hours** | **Site settings → Exceptions to opening hours** |
 | A message at the top of every page | **Site settings → Announcement banner** |
-| Regular opening hours, address, Instagram/newsletter/store/booking links, contact form key | **Site settings** |
+| Regular opening hours, address, Instagram/newsletter/store links, contact form key | **Site settings** |
 | Home page headline, intro and photo | **Home page** |
-| Lab, Studio or Space prices, texts, photos | **Lab, Studio & Space** |
+| Lab prices, Space texts (studio, events & office), photos | **Lab & Space** |
 | Add a workshop / photo walk / party | **Events → New Event** |
 | Write a blog post | **Blog → New Post** |
 | Impressum, AGB, Datenschutz | **Legal pages (German)** |
@@ -43,6 +43,7 @@ Built with [Astro](https://astro.build), hosted on GitHub Pages, edited with [Sv
 - **Photos** are resized and converted automatically when you upload them — just upload the normal file. Portrait (4:5) works best for event posters, e.g. the Instagram post.
 - In blog posts, put **two images directly below each other** (no empty line between) to show them side by side, as in the Frontier comparison post.
 - In the home page headline, wrap words in `*asterisks*` to make them yellow.
+- The **Space** page is request-only: its button (*Button text*) opens the contact form with the topic preselected. To offer online booking again, paste a booking link (e.g. SumUp Bookings) into *Booking button link*.
 - Prices are plain text, so write them exactly as they should appear (`8.99 €`, `+ 1.99 €`, `on request` — in German `8,99 €`, `auf Anfrage`).
 - Links to other pages (e.g. `/blog/fuji-frontier/`) can be written the same way in both languages; on the German site they automatically lead to the German page.
 
@@ -68,7 +69,7 @@ You can also edit any file directly on GitHub (pencil icon) — the content live
 
 1. Repository **Settings → Pages → Custom domain**: enter `www.blixmunich.de`, tick *Enforce HTTPS* once available.
 2. At the domain registrar, point DNS to GitHub: a `CNAME` record `www → <user-or-org>.github.io` and, for the bare domain, `A` records to `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` ([GitHub docs](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site)).
-3. Nothing else changes — the build picks up the new domain automatically. Old Squarespace URLs (old event and blog links, `/dsgvo`, `/home`) redirect to the new pages.
+3. Nothing else changes — the build picks up the new domain automatically. Old Squarespace URLs (old event and blog links, `/dsgvo`, `/home`) and the former `/studio/` page redirect to the new pages.
 
 **Nicer editor login (optional).** Instead of access tokens, editors can use a normal “Sign in with GitHub” button by deploying the free [Sveltia CMS Authenticator](https://github.com/sveltia/sveltia-cms-auth) on Cloudflare Workers and adding its URL as `base_url` under `backend` in `config.yml`.
 
@@ -109,7 +110,7 @@ With the dev server running, the editor offers **Work with Local Repository** (C
 src/
   content/           index.md = English, index.de.md = German translation (optional)
     home/            home page text + photo
-    pages/<id>/      Lab, Studio, Space (prices, facts, galleries) → /<id>/ and /de/<id>/
+    pages/<id>/      Lab, Space (prices, facts, galleries) → /<id>/ and /de/<id>/
     events/<id>/     one folder per event (+ poster) → /events/<id>/
     blog/<id>/       one folder per post (+ images) → /blog/<id>/
     legal/           Impressum, AGB, Datenschutz (German only) → /<file name>/

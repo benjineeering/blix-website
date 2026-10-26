@@ -1,22 +1,17 @@
 ---
-title: Unser Space
+title: Studio, Eventspace & Büro
 nav_label: Space
-summary: Ein heller, flexibler Raum für Offsites, Workshops, Team-Events und Pop-ups.
-from_price: 2 Stunden für 100 €
-intro: Heller, flexibler Meetingraum in München – ideal für Offsites, Workshops & Team-Events.
+summary: Kleines Fotostudio, heller Eventraum oder Büro für einen Tag – alles in einem Space direkt neben dem Labor.
+from_price: Auf Anfrage
+intro: Shooting, Event oder Arbeitstag in unserem Space direkt neben dem Labor? Online buchen geht nicht – schreib uns einfach, was du vorhast, und wir finden einen passenden Termin.
 sections:
-  - heading: Miete
-    text: |-
-      Unser vielseitiger Raum eignet sich perfekt für Firmen-Offsites in München, Strategie-Sessions, Workshops, kreative Meetings, kleine Events und Pop-ups. Der offene Grundriss lässt sich ganz einfach an deine Bedürfnisse anpassen – mit Tischen und Stühlen, schnellem WLAN und einem unkomplizierten Setup.
-
-      Ob Team-Offsite in München, Brainstorming oder kleines Firmenevent: Unser Space bietet eine produktive und inspirierende Umgebung.
-    prices:
-      - item: 2 Stunden
-        price: 100 €
-      - item: Halber / ganzer Tag
-        price: auf Anfrage
-    note: Buche online über den Button unten. Für individuelle Anfragen oder Fragen schreib uns einfach direkt.
-cta_label: Space buchen
+  - heading: Fotostudio
+    text: Ein kleines, flexibles Studio mit Hintergründen und Lichtequipment – für Porträts, Produkte, Fashion und Content.
+  - heading: Eventspace
+    text: Ein heller, offener Raum für Workshops, Ausstellungen, Pop-ups und kleine Events. Tische und Stühle sind da, und der Raum lässt sich an deine Pläne anpassen.
+  - heading: Büro-Setup
+    text: Tische, Stühle und schnelles WLAN für Team-Offsites, Strategie-Sessions, kreative Meetings oder einfach einen konzentrierten Arbeitstag.
+cta_label: Anfrage senden
 gallery_heading: Der Space
 ---
 

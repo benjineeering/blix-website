@@ -35,6 +35,9 @@ export default defineConfig({
   redirects: withBase({
     '/home': '',
     '/dsgvo': '/datenschutz',
+    // The studio is part of the Space page now.
+    '/studio': '/space',
+    '/de/studio': '/de/space',
     '/blog/kwvx8ktq2zqj9ai891bn14qvifpf17': '/blog/fuji-frontier',
     '/blog/blog-post-title-two-t5my5-k4xmd-67jzh-dztjk': '/blog/photo-contest-2025',
     '/events/event-one-l6fhf': '/events/2025-01-25-bw-part-1-shoot-and-dev',

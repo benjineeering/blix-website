@@ -1,5 +1,5 @@
 ---
-// Renders every entry of the "pages" collection (Lab, Studio, Space, …)
+// Renders every entry of the "pages" collection (Lab, Space, …)
 // and the "legal" collection (Impressum, AGB, Datenschutz) at /<id>/ and /de/<id>/.
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
@@ -38,6 +38,16 @@ const { Content } = await render(kind === 'page' ? entry.bodyEntry : entry);
 const page = kind === 'page' ? entry.data : undefined;
 const hasBody = Boolean((kind === 'page' ? entry.bodyEntry : entry).body?.trim());
 const contactLink = `${url(localizePath('/contact/', lang))}?topic=${entry.id}#message`;
+
+// With a booking link the main button books online. With only a button text
+// the page is request-only and the button opens the contact form instead.
+const cta = page?.cta_url
+  ? { href: page.cta_url, label: page.cta_label ?? t('service.book'), external: true }
+  : page?.cta_label
+    ? { href: contactLink, label: page.cta_label, external: false }
+    : undefined;
+const ctaTarget = cta?.external ? '_blank' : undefined;
+const ctaRel = cta?.external ? 'noopener' : undefined;
 ---
 
 {
@@ -55,14 +65,16 @@ const contactLink = `${url(localizePath('/contact/', lang))}?topic=${entry.id}#m
     page && (
       <Base title={page.title} description={page.summary}>
         <PageHeader label={`${String(page.order).padStart(2, '0')} — ${page.nav_label}`} title={page.title} intro={page.intro}>
-          {page.cta_url && (
+          {cta && (
             <div class="btn-row">
-              <a class="btn btn--primary" href={page.cta_url} target="_blank" rel="noopener">
-                {page.cta_label ?? t('service.book')} <Icon name="arrow" />
+              <a class="btn btn--primary" href={cta.href} target={ctaTarget} rel={ctaRel}>
+                {cta.label} <Icon name="arrow" />
               </a>
-              <a class="btn" href={contactLink}>
-                {t('service.ask')}
-              </a>
+              {cta.external && (
+                <a class="btn" href={contactLink}>
+                  {t('service.ask')}
+                </a>
+              )}
             </div>
           )}
         </PageHeader>
@@ -121,17 +133,19 @@ const contactLink = `${url(localizePath('/contact/', lang))}?topic=${entry.id}#m
           </section>
         )}
 
-        {page.cta_url && (
+        {cta && (
           <section class="container">
             <div class="cta-band">
-              <p class="h2">{t('service.ready')}</p>
+              <p class="h2">{cta.external ? t('service.ready') : t('service.request')}</p>
               <div class="btn-row">
-                <a class="btn btn--primary" href={page.cta_url} target="_blank" rel="noopener">
-                  {page.cta_label ?? t('service.book')} <Icon name="arrow" />
+                <a class="btn btn--primary" href={cta.href} target={ctaTarget} rel={ctaRel}>
+                  {cta.label} <Icon name="arrow" />
                 </a>
-                <a class="btn" href={contactLink}>
-                  {t('service.contact')}
-                </a>
+                {cta.external && (
+                  <a class="btn" href={contactLink}>
+                    {t('service.contact')}
+                  </a>
+                )}
               </div>
             </div>
           </section>
@@ -174,6 +188,10 @@ const contactLink = `${url(localizePath('/contact/', lang))}?topic=${entry.id}#m
 
   .sections[data-count='2'] {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  }
+
+  .sections[data-count='3'] {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   }
 
   .price-card {

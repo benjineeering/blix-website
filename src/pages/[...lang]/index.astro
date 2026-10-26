@@ -41,7 +41,7 @@ const posts = (await getLocalized('blog', lang))
       {home.text && <p class="lead">{home.text}</p>}
       <div class="btn-row">
         <a class="btn btn--primary" href={link('/lab/')}>{t('home.labPrices')} <Icon name="arrow" /></a>
-        <a class="btn" href={site.booking_url} target="_blank" rel="noopener">{t('home.book')} <Icon name="external" /></a>
+        <a class="btn" href={link('/space/')}>{t('home.space')}</a>
       </div>
     </div>
 
