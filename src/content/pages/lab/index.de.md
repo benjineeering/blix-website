@@ -3,7 +3,7 @@ title: Unser Labor
 nav_label: Labor
 summary: C41- und S/W-Entwicklung, gescannt im eigenen Labor mit unserem RGB-Kamera-Scan-Setup.
 from_price: ab 8,99 €
-intro: Wir entwickeln alle C41- und S/W-Filme. Auf unseren Social-Media-Kanälen findest du aktuelle Infos zu freien Terminen – oder schreib uns einfach direkt!
+intro: Analoge Filmentwicklung in München – wir entwickeln alle C41- und S/W-Filme in Kleinbild und Mittelformat, auch aus Einwegkameras, und scannen sie im eigenen Labor. Auf unseren Social-Media-Kanälen findest du aktuelle Infos zu freien Terminen – oder schreib uns einfach direkt!
 facts:
   - label: Bearbeitungszeit C41
     value: ca. 7–10 Tage
@@ -12,7 +12,7 @@ facts:
   - label: Abgabe
     value: zu den Öffnungszeiten
 sections:
-  - heading: Entwicklung
+  - heading: Filmentwicklung
     prices:
       - item: C41 · nur Entwicklung
         price: 8,99 €
@@ -38,4 +38,6 @@ sections:
         price: + 3,99 €
     note: 'Wie genau wir scannen, erfährst du in unserem Artikel [Warum wir keinen Dinosaurier wie den Fuji Frontier brauchen](/blog/fuji-frontier/).'
 gallery_heading: Beispielscans
+seo_title: Filmentwicklung München – C41 & S/W entwickeln lassen
+seo_description: Film entwickeln lassen in München – C41 und S/W, Kleinbild und Mittelformat, Einwegkameras und Push/Pull, mit hochauflösenden Scans aus dem eigenen Labor.
 ---

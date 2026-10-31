@@ -31,10 +31,14 @@ const german = (base: string, pattern = '*/index.de.md') => glob({ pattern, base
 // from the English entry), and any of them may still be missing.
 const translation = z.looseObject({});
 
+// Title and description for Google, when they should differ from what the page shows.
+const seo = { seo_title: optionalText, seo_description: optionalText };
+
 const home = defineCollection({
   loader: english('./src/content/home', 'index.md'),
   schema: ({ image }) =>
     z.object({
+      ...seo,
       heading: z.string(),
       text: optionalText,
       hero_image: z.preprocess(relative, image()).optional(),
@@ -47,6 +51,7 @@ const pages = defineCollection({
   loader: english('./src/content/pages'),
   schema: ({ image }) =>
     z.object({
+      ...seo,
       title: z.string(),
       nav_label: z.string(),
       order: z.number().default(99),

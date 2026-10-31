@@ -4,7 +4,7 @@ nav_label: Lab
 order: 1
 summary: C41 and B&W development, scanned in-house on our own RGB camera scanning setup.
 from_price: from 8.99 €
-intro: We develop all types of C41 and B&W film. Check out our socials for updates on available dates or contact us directly!
+intro: Film developing in Munich — we develop all types of C41 and B&W film in 35mm and 120, disposable cameras too, and scan it in our own lab. Check out our socials for updates on available dates or contact us directly!
 facts:
   - label: C41 turnaround
     value: approx. 7–10 days
@@ -13,7 +13,7 @@ facts:
   - label: Drop-off
     value: during opening hours
 sections:
-  - heading: Development
+  - heading: Film development
     prices:
       - item: C41 · develop only
         price: 8.99 €
@@ -56,4 +56,6 @@ gallery:
     caption: Kodak Vision3 250D
   - image: ./vision3-250d-fussen-2.jpg
     caption: Kodak Vision3 250D
+seo_title: Film Developing Munich – C41 & B&W Processing
+seo_description: Get your film developed in Munich — C41 and B&W, 35mm and 120, disposable cameras and push/pull, with high-resolution scans from our own lab.
 ---

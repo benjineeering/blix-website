@@ -3,8 +3,8 @@ import { render } from 'astro:content';
 import { Image, getImage } from 'astro:assets';
 import Base from '../../../layouts/Base.astro';
 import Icon from '../../../components/Icon.astro';
-import { dateLabel, timeRange, isUpcoming } from '../../../lib/time';
-import { url } from '../../../lib/url';
+import { dateLabel, timeRange, isUpcoming, eventTimes, munichIso } from '../../../lib/time';
+import { url, absoluteUrl } from '../../../lib/url';
 import { LOCALES, DEFAULT_LANG, langFromParam, localizePath } from '../../../i18n/config';
 import { useTranslations } from '../../../i18n/ui';
 import { getLocalized, type Localized } from '../../../i18n/content';
@@ -30,9 +30,35 @@ const { title, summary, poster, location, ticket_url } = event.data;
 const upcoming = isUpcoming(event);
 const time = timeRange(event);
 const shareImage = poster ? (await getImage({ src: poster, width: 1200, format: 'jpg' })).src : undefined;
+
+// Lets Google show the event in its event listings.
+const { start, end, allDay } = eventTimes(event);
+const atBlix = !location || location.includes(site.address.street);
+const structuredData = {
+  '@type': 'Event',
+  name: title,
+  description: summary,
+  startDate: allDay ? event.data.date : munichIso(start),
+  endDate: allDay ? (event.data.end_date ?? event.data.date) : munichIso(end),
+  eventStatus: 'https://schema.org/EventScheduled',
+  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  location: {
+    '@type': 'Place',
+    name: atBlix ? site.name : location,
+    address: {
+      '@type': 'PostalAddress',
+      ...(atBlix ? { streetAddress: site.address.street, postalCode: site.address.postcode } : {}),
+      addressLocality: site.address.city,
+      addressCountry: site.address.country,
+    },
+  },
+  ...(shareImage ? { image: new URL(shareImage, Astro.site).toString() } : {}),
+  organizer: { '@type': 'Organization', '@id': absoluteUrl('/#business', Astro.site), name: site.name, url: absoluteUrl('/', Astro.site) },
+  ...(ticket_url ? { offers: { '@type': 'Offer', url: ticket_url } } : {}),
+};
 ---
 
-<Base title={title} description={summary} image={shareImage}>
+<Base title={title} description={summary} image={shareImage} structuredData={structuredData}>
   <article class="container event">
     <a class="back link-arrow" href={url(localizePath('/events/', lang))}><Icon name="chevron-left" /> {t('event.all')}</a>
 

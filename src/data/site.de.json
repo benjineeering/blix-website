@@ -1,6 +1,9 @@
 {
   "tagline": "Filmlabor & Eventspace in München",
-  "description": "blix ist Filmlabor und Eventspace in München: C41- und S/W-Entwicklung, Scans aus dem eigenen Labor, Workshops, Photowalks und Ausstellungen. Auf Anfrage ist unser Space auch Fotostudio, Eventlocation oder Büro.",
+  "address": {
+    "city": "München"
+  },
+  "description": "blix ist Filmlabor und Eventspace in München: analoge Filmentwicklung (C41 und S/W), Scans aus dem eigenen Labor, Workshops, Photowalks und Ausstellungen. Auf Anfrage ist unser Space auch Fotostudio, Eventlocation oder Büro.",
   "hours_note": "",
   "announcement": "",
   "contact_intro": "Fragen zu deinem Film, einem Workshop oder zur Miete unseres Space? Schreib uns oder komm während der Öffnungszeiten vorbei."

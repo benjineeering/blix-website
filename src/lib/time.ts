@@ -45,6 +45,15 @@ export function munichTime(date: string, time = '00:00'): Date {
   return new Date(ts);
 }
 
+/** An instant as Munich local time with offset, e.g. "2026-09-26T14:00:00+02:00" (for schema.org). */
+export function munichIso(instant: Date): string {
+  const offset = zoneOffset(instant.getTime());
+  const local = new Date(instant.getTime() + offset * 60000).toISOString().slice(0, 19);
+  const hours = String(Math.floor(Math.abs(offset) / 60)).padStart(2, '0');
+  const minutes = String(Math.abs(offset) % 60).padStart(2, '0');
+  return `${local}${offset < 0 ? '-' : '+'}${hours}:${minutes}`;
+}
+
 /** Today's date in Munich as YYYY-MM-DD. */
 export function todayInMunich(now = new Date()): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: TIME_ZONE }).format(now);

@@ -63,7 +63,7 @@ const ctaRel = cta?.external ? 'noopener' : undefined;
     </Base>
   ) : (
     page && (
-      <Base title={page.title} description={page.summary}>
+      <Base title={page.seo_title ?? page.title} description={page.seo_description ?? page.summary}>
         <PageHeader label={`${String(page.order).padStart(2, '0')} — ${page.nav_label}`} title={page.title} intro={page.intro}>
           {cta && (
             <div class="btn-row">

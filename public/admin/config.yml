@@ -61,10 +61,11 @@ singletons:
       - name: address
         label: Address
         widget: object
+        i18n: duplicate
         fields:
           - { name: street, label: Street, widget: string }
           - { name: postcode, label: Postcode, widget: string }
-          - { name: city, label: City, widget: string }
+          - { name: city, label: City, widget: string, i18n: true, hint: 'Munich / München' }
           - { name: country, label: Country code, widget: string, default: DE }
       - { name: map_url, label: Map link, widget: string }
       - name: hours
@@ -130,6 +131,8 @@ singletons:
       - { name: hero_image, label: Photo, widget: image, required: false }
       - { name: hero_caption, label: Photo caption, widget: string, i18n: true, required: false, hint: 'Shown like film-edge print, e.g. “Portra 160 · scanned at blix”.' }
       - { name: strip_heading, label: Sample scans heading, widget: string, i18n: true, required: false, hint: 'The film strip shows the sample scans from the Lab page.' }
+      - &seo_title { name: seo_title, label: Google title, widget: string, i18n: true, required: false, hint: 'The headline Google shows in search results and the browser tab (about 50 characters, “ · blix” is added). Use the words people search for, e.g. “Filmentwicklung München”. Leave empty to use the page title.' }
+      - &seo_description { name: seo_description, label: Google description, widget: text, i18n: true, required: false, hint: 'The text under the headline in search results (about 150 characters). Leave empty to use the general description from Site settings or the summary.' }
 
 # ------------------------------------------------------------------ collections
 collections:
@@ -265,6 +268,8 @@ collections:
               - { name: image, label: Photo, widget: image }
               - { name: caption, label: Caption, widget: string, i18n: true, required: false }
           - { name: body, label: Fine print (e.g. cancellation terms), widget: markdown, i18n: true, required: false }
+          - *seo_title
+          - *seo_description
       - name: space
         label: Space (studio, events & office)
         file: src/content/pages/space/index.{{locale}}.md

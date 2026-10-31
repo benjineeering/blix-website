@@ -33,7 +33,7 @@ const posts = (await getLocalized('blog', lang))
   .slice(0, 2);
 ---
 
-<Base>
+<Base title={home.seo_title} description={home.seo_description}>
   <section class="hero container">
     <div class="hero-text">
       <OpenStatus class="status" />

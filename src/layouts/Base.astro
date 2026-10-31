@@ -18,12 +18,14 @@ interface Props {
   noindex?: boolean;
   /** Set to false on pages that exist in one language only. */
   alternates?: boolean;
+  /** Extra schema.org data for this page, e.g. an Event. */
+  structuredData?: Record<string, unknown>;
 }
 
 const lang = langFromUrl(Astro.url);
 const t = useTranslations(lang);
 const site = getSite(lang);
-const { title, description = site.description, image, type = 'website', noindex = false, alternates = true } = Astro.props;
+const { title, description = site.description, image, type = 'website', noindex = false, alternates = true, structuredData } = Astro.props;
 const fullTitle = title ? `${title} · ${site.name}` : `${site.name} — ${site.tagline}`;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 const alternateUrls = LOCALES.map((l) => ({ lang: l, href: new URL(url(switchLangPath(Astro.url.pathname, l)), Astro.site).toString() }));
@@ -33,6 +35,7 @@ const dayCodes: Record<string, string> = { mon: 'Mo', tue: 'Tu', wed: 'We', thu:
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
+  '@id': absoluteUrl('/#business', Astro.site),
   name: site.name,
   description: site.description,
   url: absoluteUrl('/', Astro.site),
@@ -90,6 +93,7 @@ const jsonLd = {
     <meta name="twitter:card" content="summary_large_image" />
 
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    {structuredData && <script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', ...structuredData })} />}
   </head>
   <body>
     <a class="skip-link" href="#main">{t('nav.skip')}</a>
