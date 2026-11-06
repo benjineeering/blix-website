@@ -3,7 +3,7 @@ title: Our Lab
 nav_label: Lab
 order: 1
 summary: C41 and B&W development, scanned in-house on our own RGB camera scanning setup.
-from_price: from 8.99 €
+from_price: from 6.99 €
 intro: Film developing in Munich — we develop all types of C41 and B&W film in 35mm and 120, disposable cameras too, and scan it in our own lab. Check out our socials for updates on available dates or contact us directly!
 facts:
   - label: C41 turnaround
@@ -16,13 +16,13 @@ sections:
   - heading: Film development
     prices:
       - item: C41 · develop only
-        price: 8.99 €
+        price: 6.99 €
       - item: C41 · develop + scan
-        price: 15.99 €
+        price: 16.99 €
       - item: B&W · develop only
         price: 11.99 €
       - item: B&W · develop + scan
-        price: 18.99 €
+        price: 21.99 €
       - item: Push / pull process
         price: + 3.99 €
       - item: Disposable camera
@@ -31,6 +31,8 @@ sections:
   - heading: Scanning
     text: We use a custom RGB camera scanning setup, developed in-house and in collaboration with VALOI’s experts. This ensures every scan is captured with precision, bringing out the best in your images.
     prices:
+      - item: Scan only · already developed film
+        price: 9.99 €
       - item: Standard scan · ~3000 × 2000 px
         price: included
       - item: XL scan · ~6000 × 4000 px
@@ -40,6 +42,8 @@ sections:
     note: 'Want to know more about how we scan? Read [Why we don’t need a dinosaur like the Fuji Frontier](/blog/fuji-frontier/).'
 gallery_heading: Sample scans
 gallery:
+  - image: ./cinestill-800t-china.jpg
+    caption: CineStill 800T
   - image: ./portra-400-uk.jpg
     caption: Portra 400
   - image: ./portra-160-test.jpg

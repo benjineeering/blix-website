@@ -2,7 +2,7 @@
 title: Unser Labor
 nav_label: Labor
 summary: C41- und S/W-Entwicklung, gescannt im eigenen Labor mit unserem RGB-Kamera-Scan-Setup.
-from_price: ab 8,99 €
+from_price: ab 6,99 €
 intro: Analoge Filmentwicklung in München – wir entwickeln alle C41- und S/W-Filme in Kleinbild und Mittelformat, auch aus Einwegkameras, und scannen sie im eigenen Labor. Auf unseren Social-Media-Kanälen findest du aktuelle Infos zu freien Terminen – oder schreib uns einfach direkt!
 facts:
   - label: Bearbeitungszeit C41
@@ -15,13 +15,13 @@ sections:
   - heading: Filmentwicklung
     prices:
       - item: C41 · nur Entwicklung
-        price: 8,99 €
+        price: 6,99 €
       - item: C41 · Entwicklung + Scan
-        price: 15,99 €
+        price: 16,99 €
       - item: S/W · nur Entwicklung
         price: 11,99 €
       - item: S/W · Entwicklung + Scan
-        price: 18,99 €
+        price: 21,99 €
       - item: Push- / Pull-Entwicklung
         price: + 3,99 €
       - item: Einwegkamera
@@ -30,6 +30,8 @@ sections:
   - heading: Scannen
     text: Wir scannen mit einem eigenen RGB-Kamera-Scan-Setup, das wir selbst und gemeinsam mit dem Team von VALOI entwickelt haben. So wird jeder Scan präzise erfasst und holt das Beste aus deinen Bildern heraus.
     prices:
+      - item: Nur Scan · bereits entwickelter Film
+        price: 9,99 €
       - item: Standard-Scan · ~3000 × 2000 px
         price: inklusive
       - item: XL-Scan · ~6000 × 4000 px
