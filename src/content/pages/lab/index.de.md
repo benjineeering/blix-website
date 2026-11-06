@@ -38,7 +38,7 @@ sections:
         price: + 1,99 €
       - item: XL als TIFF
         price: + 3,99 €
-    note: 'Wie genau wir scannen, erfährst du in unserem Artikel [Warum wir keinen Dinosaurier wie den Fuji Frontier brauchen](/blog/fuji-frontier/).'
+    note: 'Wie genau wir scannen, erfährst du in unserem Artikel [Warum wir keinen Dinosaurier wie den Fuji Frontier brauchen](/blog/fuji-frontier/) – oder bei [Obelisk](https://image.northharbourinstruments.com/), der Software für kalibrierte Filmscans, die aus unserer Arbeit bei blix entstanden ist.'
 gallery_heading: Beispielscans
 seo_title: Filmentwicklung München – C41 & S/W entwickeln lassen
 seo_description: Film entwickeln lassen in München – C41 und S/W, Kleinbild und Mittelformat, Einwegkameras und Push/Pull, mit hochauflösenden Scans aus dem eigenen Labor.

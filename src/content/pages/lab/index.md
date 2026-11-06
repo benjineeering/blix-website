@@ -39,7 +39,7 @@ sections:
         price: + 1.99 €
       - item: XL TIFF output
         price: + 3.99 €
-    note: 'Want to know more about how we scan? Read [Why we don’t need a dinosaur like the Fuji Frontier](/blog/fuji-frontier/).'
+    note: 'Want to know more about how we scan? Read [Why we don’t need a dinosaur like the Fuji Frontier](/blog/fuji-frontier/), or visit [Obelisk](https://image.northharbourinstruments.com/) — the calibrated film scanning software that grew out of our work at blix.'
 gallery_heading: Sample scans
 gallery:
   - image: ./cinestill-800t-china.jpg
